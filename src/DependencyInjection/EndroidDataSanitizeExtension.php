@@ -7,7 +7,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace EndroidDataSanitizeBundle\DependencyInjection;
+namespace Endroid\Bundle\DataSanitizeBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
