@@ -41,6 +41,18 @@ public function registerBundles()
 }
 ```
 
+## Routing
+
+Add the following section to your routing to be able to visit the routes
+provided by this bundle.
+
+``` yml
+EndroidDataSanitizeBundle:
+    resource: "@EndroidDataSanitizeBundle/Controller/"
+    type:     annotation
+    prefix:   /data-sanitize
+```
+
 ## Configuration
 
 By default entities and relations are derived from their doctrine class meta
