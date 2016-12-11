@@ -9,6 +9,8 @@
 
 namespace Endroid\Bundle\DataSanitizeBundle\Controller;
 
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Endroid\Bundle\DataSanitizeBundle\Sanitizer\Sanitizer;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -29,64 +31,21 @@ class MergeController extends Controller
      */
     public function indexAction(Request $request, $name)
     {
-        $entities = $this->getDoctrine()->getRepository($this->getClass($name))->findAll();
+        $entities = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findAll();
         $selected = $this->filter($entities, (array) $request->query->get('selected'));
-        $target = $this->getDoctrine()->getRepository($this->getClass($name))->findOneBy(array('id' => $request->query->get('target')));
+        $target = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findOneBy(array('id' => $request->query->get('target')));
+
+        if ($request->getMethod() == 'POST') {
+            $this->getSanitizer()->sanitize($name, $selected, $target);
+        }
 
         return [
             'name' => $name,
             'entities' => $entities,
+            'listFields' => $this->getSanitizer()->getListFields($name),
             'selected' => $selected,
             'target' => $target,
-        ];
-    }
-
-    /**
-     * @Route("/list")
-     * @Template()
-     *
-     * @param string $name
-     * @param array $entities
-     * @param array $selected
-     * @return array
-     */
-    public function listAction($name, $entities, $selected)
-    {
-        return [
-            'entities' => $entities,
-            'selected' => $selected,
-        ];
-    }
-
-    /**
-     * @Route("/selected")
-     * @Template()
-     *
-     * @param string $name
-     * @param array $selected
-     * @param mixed $target
-     * @return array
-     */
-    public function selectedAction($name, $selected, $target)
-    {
-        return [
-            'selected' => $selected,
-            'target' => $target,
-        ];
-    }
-
-    /**
-     * @Route("/target")
-     * @Template()
-     *
-     * @param string $name
-     * @param mixed $target
-     * @return array
-     */
-    public function targetAction($name, $target)
-    {
-        return [
-            'target' => $target,
+            'editFields' => $this->getSanitizer()->getEditFields($name),
         ];
     }
 
@@ -108,15 +67,10 @@ class MergeController extends Controller
     }
 
     /**
-     * @param $name
-     * @return mixed
+     * @return Sanitizer
      */
-    protected function getClass($name)
+    protected function getSanitizer()
     {
-        $classes = [
-            'user' => 'UserBundle:User',
-        ];
-
-        return $classes[$name];
+        return $this->get('endroid_data_sanitize.sanitizer');
     }
 }
