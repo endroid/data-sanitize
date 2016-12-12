@@ -52,19 +52,39 @@ class Sanitizer
         foreach ($metaData as $meta) {
             foreach ($meta->getAssociationMappings() as $mapping) {
                 if ($mapping['targetEntity'] == $class) {
+                    if (!$mapping['isOwningSide']) {
+                        continue;
+                    }
+                    $repository = $this->manager->getRepository($mapping['sourceEntity']);
+                    foreach ($selected as $entity) {
+                        $relations = $repository->findBy([$mapping['fieldName'] => $entity]);
+                        foreach ($relations as $relation) {
+                            $relation->{'set'.ucfirst($mapping['fieldName'])}($target);
+                        }
+                    }
+                    dump($meta);
                     dump($mapping);
+                    dump('b');
+//                    $relation = $target->{'get' . ucfirst($mapping['fieldName'])}();
+//                    dump($relation);
                 }
                 if ($mapping['sourceEntity'] == $class) {
+                    dump($meta);
                     dump($mapping);
-                    $relation = $target->{'get' . ucfirst($mapping['fieldName'])}();
-                    foreach ($selected as $entity) {
-                        $entity->{'set'.ucfirst($mapping['fieldName'])}($relation);
-                    }
+                    dump('c');
+//                    $relation = $target->{'get' . ucfirst($mapping['fieldName'])}();
+//                    foreach ($selected as $entity) {
+//                        $entity->{'set'.ucfirst($mapping['fieldName'])}($relation);
+//                    }
                 }
             }
         }
 
-        die;
+        foreach ($selected as $entity) {
+            $this->manager->remove($entity);
+        }
+
+        $this->manager->flush();
     }
 
     /**
