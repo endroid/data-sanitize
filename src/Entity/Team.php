@@ -26,22 +26,18 @@ class Team
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string")
      */
     protected $name;
 
     /**
      * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\League", cascade={"persist"})
+     * @ORM\JoinColumn(nullable=false)
      */
     protected $league;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Person", cascade={"persist"})
-     */
-    protected $coach;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Person", mappedBy="team", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Player", mappedBy="team", cascade={"persist"})
      */
     protected $players;
 
@@ -88,29 +84,13 @@ class Team
     /**
      * @param League $league
      */
-    public function setLeague(League $league = null)
+    public function setLeague(League $league)
     {
         $this->league = $league;
     }
 
     /**
-     * @return Person
-     */
-    public function getCoach()
-    {
-        return $this->coach;
-    }
-
-    /**
-     * @param Person $coach
-     */
-    public function setCoach(Person $coach = null)
-    {
-        $this->coach = $coach;
-    }
-
-    /**
-     * @return Person[]
+     * @return Player[]
      */
     public function getPlayers()
     {
@@ -118,17 +98,27 @@ class Team
     }
 
     /**
-     * @param Person[] $players
+     * @param Player[] $players
      */
     public function setPlayers(array $players)
     {
-        $this->players = $players;
+        // Remove players not present in new
+        foreach ($this->players as $player) {
+            if (!in_array($player, $players)) {
+                $this->removePlayer($player);
+            }
+        }
+
+        // Add all players from new
+        foreach ($players as $player) {
+            $this->addPlayer($player);
+        }
     }
 
     /**
-     * @param Person $player
+     * @param Player $player
      */
-    public function addPlayer(Person $player)
+    public function addPlayer(Player $player)
     {
         if (!$this->players->contains($player)) {
             $this->players->add($player);
@@ -138,11 +128,13 @@ class Team
     }
 
     /**
-     * @param Person $player
+     * @param Player $player
      */
-    public function removePlayer(Person $player)
+    public function removePlayer(Player $player)
     {
         $this->players->removeElement($player);
+
+        $player->setTeam(null);
     }
 
     /**

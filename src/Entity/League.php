@@ -26,7 +26,7 @@ class League
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string")
      */
     protected $name;
 
@@ -96,11 +96,22 @@ class League
     }
 
     /**
+     * @param array $teams
+     */
+    public function removeTeams(array $teams = [])
+    {
+        foreach ($teams as $team) {
+            $this->removeTeam($team);
+        }
+    }
+
+    /**
      * @param Team $team
      */
     public function removeTeam(Team $team)
     {
         $this->teams->removeElement($team);
+        $team->setLeague(null);
     }
 
     /**

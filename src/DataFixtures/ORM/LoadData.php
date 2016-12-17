@@ -12,7 +12,7 @@ namespace Endroid\Bundle\DataSanitizeBundle\DataFixtures\ORM;
 use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Endroid\Bundle\DataSanitizeBundle\Entity\League;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Person;
+use Endroid\Bundle\DataSanitizeBundle\Entity\Player;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Team;
 
 class LoadData extends AbstractFixture
@@ -33,13 +33,10 @@ class LoadData extends AbstractFixture
                 $team = new Team();
                 $team->setName('Team '.$t);
                 for ($p = 1; $p <= $playerCount; $p++) {
-                    $player = new Person();
+                    $player = new Player();
                     $player->setName('Player '.$p);
                     $team->addPlayer($player);
                 }
-                $coach = new Person();
-                $coach->setName('Coach '.$t);
-                $team->setCoach($coach);
                 $league->addTeam($team);
             }
             $manager->persist($league);

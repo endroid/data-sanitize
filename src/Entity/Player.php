@@ -13,9 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="data_sanitize_example_person")
+ * @ORM\Table(name="data_sanitize_example_player")
  */
-class Person
+class Player
 {
     /**
      * @ORM\Column(type="integer")
@@ -25,12 +25,13 @@ class Person
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string")
      */
     protected $name;
 
     /**
      * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Team", cascade={"persist"})
+     * @ORM\JoinColumn(nullable=false)
      */
     protected $team;
 
@@ -69,7 +70,7 @@ class Person
     /**
      * @param Team $team
      */
-    public function setTeam(Team $team = null)
+    public function setTeam(Team $team)
     {
         $this->team = $team;
     }

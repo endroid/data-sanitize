@@ -31,6 +31,8 @@ class MergeController extends Controller
      */
     public function indexAction(Request $request, $name)
     {
+        $strategy = (array) $request->query->get('strategy');
+        $relations = $this->getSanitizer()->getRelations($name);
         $entities = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findAll();
         $selected = $this->filter($entities, (array) $request->query->get('selected'));
         $target = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findOneBy(array('id' => $request->query->get('target')));
@@ -41,6 +43,8 @@ class MergeController extends Controller
 
         return [
             'name' => $name,
+            'strategy' => $strategy,
+            'relations' => $relations,
             'entities' => $entities,
             'listFields' => $this->getSanitizer()->getListFields($name),
             'selected' => $selected,

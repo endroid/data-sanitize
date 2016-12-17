@@ -11,6 +11,7 @@ namespace Endroid\Bundle\DataSanitizeBundle\Sanitizer;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use ReflectionClass;
 
 class Sanitizer
 {
@@ -38,53 +39,114 @@ class Sanitizer
 
     /**
      * @param string $name
-     * @param array $selected
+     * @param array $sources
      * @param mixed $target
      */
-    public function sanitize($name, $selected, $target)
+    public function sanitize($name, array $sources, $target)
     {
-        $class = $this->entities[$name]['class'];
+        foreach ($sources as $source) {
+            $this->sanitizeSingleSource($name, $source, $target);
+        }
 
-        unset($selected[$target->getId()]);
+        $this->manager->flush();
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $source
+     * @param mixed $target
+     */
+    protected function sanitizeSingleSource($name, $source, $target)
+    {
+        if ($source == $target) {
+            return;
+        }
+
+        $class = $this->getClass($name);
 
         /** @var ClassMetaData[] $metaData */
         $metaData = $this->manager->getMetadataFactory()->getAllMetadata();
+
         foreach ($metaData as $meta) {
             foreach ($meta->getAssociationMappings() as $mapping) {
                 if ($mapping['targetEntity'] == $class) {
-                    if (!$mapping['isOwningSide']) {
-                        continue;
-                    }
-                    $repository = $this->manager->getRepository($mapping['sourceEntity']);
-                    foreach ($selected as $entity) {
-                        $relations = $repository->findBy([$mapping['fieldName'] => $entity]);
-                        foreach ($relations as $relation) {
-                            $relation->{'set'.ucfirst($mapping['fieldName'])}($target);
-                        }
-                    }
-                    dump($meta);
-                    dump($mapping);
-                    dump('b');
-//                    $relation = $target->{'get' . ucfirst($mapping['fieldName'])}();
-//                    dump($relation);
+                    $key = $this->createRelationKey($mapping);
+//                    $queryBuilder = $this->manager->createQueryBuilder();
+//                    $queryBuilder
+//                        ->select('source')
+//                        ->from($mapping['sourceEntity'], 'source')
+//                        ->join('source.'.$mapping['fieldName'], 'target')
+//                        ->where('target = :target')
+//                        ->setParameter('target', $target)
+//                    ;
+//
+//                    $results = $queryBuilder->getQuery()->getResult();
+//                    foreach ($results as $result) {
+//                        $result->{'remove'.ucfirst($mapping['fieldName'])}($selected);
+//                    }
+
+//                    dump($meta);
+//                    dump($mapping);
+//                    dump($relations);
+//                    die;
                 }
                 if ($mapping['sourceEntity'] == $class) {
-                    dump($meta);
-                    dump($mapping);
-                    dump('c');
-//                    $relation = $target->{'get' . ucfirst($mapping['fieldName'])}();
-//                    foreach ($selected as $entity) {
-//                        $entity->{'set'.ucfirst($mapping['fieldName'])}($relation);
-//                    }
+                    $key = $this->createRelationKey($mapping);
+                    $sourceData = $source->{'get'.$mapping['fieldName']}();
+                    $targetData = $target->{'get'.$mapping['fieldName']}();
+                    if (is_array($sourceData)) {
+                        $targetData = array_merge($sourceData, $targetData);
+                        $target->{'set'.$mapping['fieldName']}($targetData); // set players
+                    } else {
+//                        dump($data);
+                    }
                 }
             }
         }
 
-        foreach ($selected as $entity) {
-            $this->manager->remove($entity);
+        $this->manager->remove($source);
+    }
+
+    /**
+     * @param string $name
+     * @return array
+     */
+    public function getRelations($name)
+    {
+        $class = $this->getClass($name);
+
+        /** @var ClassMetaData[] $metaData */
+        $metaData = $this->manager->getMetadataFactory()->getAllMetadata();
+
+        $relations = [];
+        foreach ($metaData as $meta) {
+            foreach ($meta->getAssociationMappings() as $mapping) {
+                if ($mapping['targetEntity'] == $class) {
+                    $reflect = new ReflectionClass($meta->name);
+                    $relations[] = [
+                        'id' => $this->createRelationKey($mapping),
+                        'description' => $reflect->getShortName().' has '.$mapping['fieldName'].' target',
+                    ];
+                }
+                if ($mapping['sourceEntity'] == $class) {
+                    $relations[] = [
+                        'id' => $this->createRelationKey($mapping),
+                        'description' => ucfirst($name).' has '.$mapping['fieldName'].' source',
+                    ];
+                }
+            }
         }
 
-        $this->manager->flush();
+        return $relations;
+    }
+
+    /**
+     * @param array $mapping
+     * @return string
+     */
+    public function createRelationKey(array $mapping)
+    {
+        return sha1($mapping['sourceEntity'].$mapping['targetEntity'].$mapping['fieldName']);
     }
 
     /**
