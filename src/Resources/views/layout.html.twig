@@ -1,1 +1,5 @@
 {% extends 'AppBundle::base.html.twig' %}
+
+{% block menu %}
+    {{ render(controller('EndroidDataSanitizeBundle:Merge:menu')) }}
+{% endblock %}

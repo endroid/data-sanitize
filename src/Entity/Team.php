@@ -84,7 +84,7 @@ class Team
     /**
      * @param League $league
      */
-    public function setLeague(League $league)
+    public function setLeague(League $league = null)
     {
         $this->league = $league;
     }
@@ -133,7 +133,6 @@ class Team
     public function removePlayer(Player $player)
     {
         $this->players->removeElement($player);
-
         $player->setTeam(null);
     }
 

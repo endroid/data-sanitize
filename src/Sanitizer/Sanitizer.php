@@ -18,7 +18,7 @@ class Sanitizer
     /**
      * @var array
      */
-    protected $entities;
+    protected $config;
 
     /**
      * @var EntityManager
@@ -28,12 +28,12 @@ class Sanitizer
     /**
      * Creates a new instance.
      *
-     * @param array $entities
+     * @param array $config
      * @param EntityManager $manager
      */
-    public function __construct(array $entities, EntityManager $manager)
+    public function __construct(array $config, EntityManager $manager)
     {
-        $this->entities = $entities;
+        $this->config = $config;
         $this->manager = $manager;
     }
 
@@ -41,36 +41,31 @@ class Sanitizer
      * @param string $name
      * @param array $sources
      * @param mixed $target
+     * @param array $strategy
      */
-    public function sanitize($name, array $sources, $target)
+    public function sanitize($name, array $sources, $target, array $strategy)
     {
-        foreach ($sources as $source) {
-            $this->sanitizeSingleSource($name, $source, $target);
-        }
-
-        $this->manager->flush();
-    }
-
-    /**
-     * @param string $name
-     * @param mixed $source
-     * @param mixed $target
-     */
-    protected function sanitizeSingleSource($name, $source, $target)
-    {
-        if ($source == $target) {
-            return;
-        }
-
         $class = $this->getClass($name);
 
         /** @var ClassMetaData[] $metaData */
         $metaData = $this->manager->getMetadataFactory()->getAllMetadata();
 
-        foreach ($metaData as $meta) {
-            foreach ($meta->getAssociationMappings() as $mapping) {
-                if ($mapping['targetEntity'] == $class) {
-                    $key = $this->createRelationKey($mapping);
+        foreach ($sources as $source) {
+            if ($source == $target) {
+                continue;
+            }
+
+            foreach ($metaData as $meta) {
+                foreach ($meta->getAssociationMappings() as $mapping) {
+                    if ($mapping['targetEntity'] == $class) {
+                        $key = $this->createRelationKey($mapping);
+                        if (isset($strategy[$key])) {
+                            // Copy values
+                        } else {
+                            // Break relations to avoid integrity issues
+                        }
+
+
 //                    $queryBuilder = $this->manager->createQueryBuilder();
 //                    $queryBuilder
 //                        ->select('source')
@@ -89,22 +84,24 @@ class Sanitizer
 //                    dump($mapping);
 //                    dump($relations);
 //                    die;
-                }
-                if ($mapping['sourceEntity'] == $class) {
-                    $key = $this->createRelationKey($mapping);
-                    $sourceData = $source->{'get'.$mapping['fieldName']}();
-                    $targetData = $target->{'get'.$mapping['fieldName']}();
-                    if (is_array($sourceData)) {
-                        $targetData = array_merge($sourceData, $targetData);
-                        $target->{'set'.$mapping['fieldName']}($targetData); // set players
-                    } else {
-//                        dump($data);
+                    }
+                    if ($mapping['sourceEntity'] == $class) {
+                        $key = $this->createRelationKey($mapping);
+                        $sourceData = $source->{'get'.ucfirst($mapping['fieldName'])}();
+                        if (isset($strategy[$key])) {
+                            $targetData = $target->{'get'.$mapping['fieldName']}();
+                            $targetData = is_array($sourceData) ? array_merge($sourceData, $targetData) : $targetData;
+                            $target->{'set'.ucfirst($mapping['fieldName'])}($targetData);
+                        }
+                        $sourceData = is_array($sourceData) ? [] : null;
+                        $source->{'set' . ucfirst($mapping['fieldName'])}($sourceData);
                     }
                 }
             }
+            $this->manager->remove($source);
         }
 
-        $this->manager->remove($source);
+        $this->manager->flush();
     }
 
     /**
@@ -125,13 +122,13 @@ class Sanitizer
                     $reflect = new ReflectionClass($meta->name);
                     $relations[] = [
                         'id' => $this->createRelationKey($mapping),
-                        'description' => $reflect->getShortName().' has '.$mapping['fieldName'].' target',
+                        'description' => 'Update '.lcfirst($reflect->getShortName()).' '.$mapping['fieldName'],
                     ];
                 }
                 if ($mapping['sourceEntity'] == $class) {
                     $relations[] = [
                         'id' => $this->createRelationKey($mapping),
-                        'description' => ucfirst($name).' has '.$mapping['fieldName'].' source',
+                        'description' => 'Update '.$name.' '.$mapping['fieldName'],
                     ];
                 }
             }
@@ -150,12 +147,20 @@ class Sanitizer
     }
 
     /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
      * @param string $name
      * @return string
      */
     public function getClass($name)
     {
-        return $this->entities[$name]['class'];
+        return $this->config[$name]['class'];
     }
 
     /**
@@ -164,7 +169,7 @@ class Sanitizer
      */
     public function getListFields($name)
     {
-        return $this->entities[$name]['list'];
+        return $this->config[$name]['list'];
     }
 
     /**
@@ -173,6 +178,6 @@ class Sanitizer
      */
     public function getEditFields($name)
     {
-        return $this->entities[$name]['edit'];
+        return $this->config[$name]['edit'];
     }
 }

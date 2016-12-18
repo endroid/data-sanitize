@@ -70,7 +70,7 @@ class Player
     /**
      * @param Team $team
      */
-    public function setTeam(Team $team)
+    public function setTeam(Team $team = null)
     {
         $this->team = $team;
     }

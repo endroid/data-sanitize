@@ -80,7 +80,17 @@ class League
      */
     public function setTeams(array $teams)
     {
-        $this->teams = $teams;
+        // Remove team not present in new
+        foreach ($this->teams as $team) {
+            if (!in_array($team, $teams)) {
+                $this->removeTeam($team);
+            }
+        }
+
+        // Add all team from new
+        foreach ($teams as $team) {
+            $this->addTeam($team);
+        }
     }
 
     /**
@@ -93,16 +103,6 @@ class League
         }
 
         $team->setLeague($this);
-    }
-
-    /**
-     * @param array $teams
-     */
-    public function removeTeams(array $teams = [])
-    {
-        foreach ($teams as $team) {
-            $this->removeTeam($team);
-        }
     }
 
     /**
