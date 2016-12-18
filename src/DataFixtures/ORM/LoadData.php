@@ -13,7 +13,10 @@ use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Endroid\Bundle\DataSanitizeBundle\Entity\League;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Player;
+use Endroid\Bundle\DataSanitizeBundle\Entity\Project;
+use Endroid\Bundle\DataSanitizeBundle\Entity\Task;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Team;
+use Endroid\Bundle\DataSanitizeBundle\Entity\User;
 
 class LoadData extends AbstractFixture
 {
@@ -22,24 +25,30 @@ class LoadData extends AbstractFixture
      */
     public function load(ObjectManager $manager)
     {
-        $leagueCount = 3;
-        $teamCount = 12;
-        $playerCount = 16;
+        $projectCount = 8;
+        $projectUserCount = 5;
+        $userTaskCount = 3;
 
-        for ($l = 1; $l <= $leagueCount; $l++) {
-            $league = new League();
-            $league->setName('League '.$l);
-            for ($t = 1; $t <= $teamCount; $t++) {
-                $team = new Team();
-                $team->setName('Team '.$t);
-                for ($p = 1; $p <= $playerCount; $p++) {
-                    $player = new Player();
-                    $player->setName('Player '.$p);
-                    $team->addPlayer($player);
+        $currentUser = 1;
+        $currentTask = 1;
+
+        for ($p = 1; $p <= $projectCount; $p++) {
+            $project = new Project();
+            $project->setName('Project '.$p);
+            for ($u = 1; $u <= $projectUserCount; $u++) {
+                $user = new User();
+                $user->setName('User '.$currentUser);
+                for ($t = 1; $t <= $userTaskCount; $t++) {
+                    $task = new Task();
+                    $task->setName('Task '.$currentTask);
+                    $user->addTask($task);
+                    $project->addTask($task);
+                    $currentTask++;
                 }
-                $league->addTeam($team);
+                $currentUser++;
+                $project->addUser($user);
             }
-            $manager->persist($league);
+            $manager->persist($project);
         }
 
         $manager->flush();
