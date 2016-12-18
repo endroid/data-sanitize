@@ -122,13 +122,13 @@ class Sanitizer
                     $reflect = new ReflectionClass($meta->name);
                     $relations[] = [
                         'id' => $this->createRelationKey($mapping),
-                        'description' => 'Update '.lcfirst($reflect->getShortName()).' '.$mapping['fieldName'],
+                        'description' => 'Copy '.lcfirst($reflect->getShortName()).' '.$mapping['fieldName'],
                     ];
                 }
                 if ($mapping['sourceEntity'] == $class) {
                     $relations[] = [
                         'id' => $this->createRelationKey($mapping),
-                        'description' => 'Update '.$name.' '.$mapping['fieldName'],
+                        'description' => 'Copy '.$name.' '.$mapping['fieldName'],
                     ];
                 }
             }
