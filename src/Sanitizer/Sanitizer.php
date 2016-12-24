@@ -15,6 +15,9 @@ use ReflectionClass;
 
 class Sanitizer
 {
+    const JOIN_TYPE_TABLE = 'table';
+    const JOIN_TYPE_COLUMN = 'column';
+
     /**
      * @var array
      */
@@ -45,60 +48,34 @@ class Sanitizer
      */
     public function sanitize($name, array $sources, $target, array $strategy)
     {
-        $class = $this->getClass($name);
-
-        /** @var ClassMetaData[] $metaData */
-        $metaData = $this->manager->getMetadataFactory()->getAllMetadata();
+        $relations = $this->getRelations($name);
 
         foreach ($sources as $source) {
-            if ($source == $target) {
-                continue;
-            }
-
-            foreach ($metaData as $meta) {
-                foreach ($meta->getAssociationMappings() as $mapping) {
-                    if ($mapping['targetEntity'] == $class) {
-                        $key = $this->createRelationKey($mapping);
-                        if (isset($strategy[$key])) {
-                            // Copy values
-                        } else {
-                            // Break relations to avoid integrity issues
+            if ($target !== $source) {
+                foreach ($relations as $key => $relation) {
+                    if (isset($strategy[$key])) {
+                        switch ($relation['join']) {
+                            case self::JOIN_TYPE_TABLE:
+                                $items = $source->{'get'.ucfirst($relation['property'])}();
+                                foreach ($items as $item) {
+                                    $target->{'add'.ucfirst(substr($relation['property'], 0, -1))}($item);
+                                }
+                                break;
+                            case self::JOIN_TYPE_COLUMN:
+                                $queryBuilder = $this->manager->createQueryBuilder();
+                                $queryBuilder
+                                    ->update($relation['source'], 'source')
+                                    ->set('source.'.$relation['property'], $target->getId())
+                                    ->where('source.'.$relation['property'].' = :target')
+                                    ->setParameter('target', $source->getId())
+                                    ->getQuery()->execute();
+                                break;
                         }
-
-
-//                    $queryBuilder = $this->manager->createQueryBuilder();
-//                    $queryBuilder
-//                        ->select('source')
-//                        ->from($mapping['sourceEntity'], 'source')
-//                        ->join('source.'.$mapping['fieldName'], 'target')
-//                        ->where('target = :target')
-//                        ->setParameter('target', $target)
-//                    ;
-//
-//                    $results = $queryBuilder->getQuery()->getResult();
-//                    foreach ($results as $result) {
-//                        $result->{'remove'.ucfirst($mapping['fieldName'])}($selected);
-//                    }
-
-//                    dump($meta);
-//                    dump($mapping);
-//                    dump($relations);
-//                    die;
-                    }
-                    if ($mapping['sourceEntity'] == $class) {
-                        $key = $this->createRelationKey($mapping);
-                        $sourceData = $source->{'get'.ucfirst($mapping['fieldName'])}();
-                        if (isset($strategy[$key])) {
-                            $targetData = $target->{'get'.$mapping['fieldName']}();
-                            $targetData = is_array($sourceData) ? array_merge($sourceData, $targetData) : $targetData;
-                            $target->{'set'.ucfirst($mapping['fieldName'])}($targetData);
-                        }
-                        $sourceData = is_array($sourceData) ? [] : null;
-                        $source->{'set' . ucfirst($mapping['fieldName'])}($sourceData);
+                        $this->manager->remove($source);
                     }
                 }
+                $this->manager->remove($source);
             }
-            $this->manager->remove($source);
         }
 
         $this->manager->flush();
@@ -118,32 +95,35 @@ class Sanitizer
         $relations = [];
         foreach ($metaData as $meta) {
             foreach ($meta->getAssociationMappings() as $mapping) {
-                if ($mapping['targetEntity'] == $class) {
-                    $reflect = new ReflectionClass($meta->name);
-                    $relations[] = [
-                        'id' => $this->createRelationKey($mapping),
-                        'description' => 'Copy '.lcfirst($reflect->getShortName()).' '.$mapping['fieldName'],
-                    ];
-                }
-                if ($mapping['sourceEntity'] == $class) {
-                    $relations[] = [
-                        'id' => $this->createRelationKey($mapping),
-                        'description' => 'Copy '.$name.' '.$mapping['fieldName'],
-                    ];
+                if ($mapping['targetEntity'] == $class || $mapping['sourceEntity'] == $class) {
+                    if (isset($mapping['joinTable']['name'])) {
+                        $key = $mapping['joinTable']['name'];
+                        $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
+                        $relations[$key] = [
+                            'id' => $key,
+                            'join' => self::JOIN_TYPE_TABLE,
+                            'property' => $mapping['fieldName'],
+                            'source' => $mapping['sourceEntity'],
+                            'target' => $mapping['targetEntity'],
+                            'description' => 'Copy '.$name,
+                        ];
+                    } elseif (isset($mapping['joinColumns'])) {
+                        $key = $meta->table['name'] . '.' . $mapping['fieldName'];
+                        $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
+                        $relations[$key] = [
+                            'id' => $key,
+                            'join' => self::JOIN_TYPE_COLUMN,
+                            'property' => $mapping['fieldName'],
+                            'source' => $mapping['sourceEntity'],
+                            'target' => $mapping['targetEntity'],
+                            'description' => 'Copy '.$name,
+                        ];
+                    }
                 }
             }
         }
 
         return $relations;
-    }
-
-    /**
-     * @param array $mapping
-     * @return string
-     */
-    public function createRelationKey(array $mapping)
-    {
-        return sha1($mapping['sourceEntity'].$mapping['targetEntity'].$mapping['fieldName']);
     }
 
     /**

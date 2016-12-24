@@ -32,6 +32,7 @@ class MergeController extends Controller
      */
     public function indexAction(Request $request, $name)
     {
+        $class = $this->getSanitizer()->getClass($name);
         $strategy = (array) $request->query->get('strategy');
         $relations = $this->getSanitizer()->getRelations($name);
         $entities = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findAll();
@@ -40,11 +41,18 @@ class MergeController extends Controller
 
         if ($request->getMethod() == 'POST') {
             $this->getSanitizer()->sanitize($name, $selected, $target, $strategy);
-            return $this->redirect($request->getUri());
+            return $this->redirectToRoute('endroid_datasanitize_merge_index', [ 'name' => $name ]);
+        }
+
+        foreach ($relations as $key => $relation) {
+            if ($relation['join'] == Sanitizer::JOIN_TYPE_COLUMN && $relation['source'] === $class) {
+                unset($relations[$key]);
+            }
         }
 
         return [
             'name' => $name,
+            'class' => $class,
             'strategy' => $strategy,
             'relations' => $relations,
             'entities' => $entities,
