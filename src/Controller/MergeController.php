@@ -37,7 +37,7 @@ class MergeController extends Controller
         $relations = $this->getSanitizer()->getRelations($name);
         $entities = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findAll();
         $selected = $this->filter($entities, (array) $request->query->get('selected'));
-        $target = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findOneBy(array('id' => $request->query->get('target')));
+        $target = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findOneBy(['id' => $request->query->get('target')]);
 
         if ($request->getMethod() == 'POST') {
             $this->getSanitizer()->sanitize($name, $selected, $target, $strategy);
