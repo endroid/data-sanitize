@@ -26,7 +26,7 @@
                             {% for relation in relations %}
                                 <tr>
                                     <td><input name="strategy[{{ relation.id }}]" type="checkbox" value="1"{% if relation.id in strategy|keys %} checked="checked"{% endif %} /></td>
-                                    <td width="100%">{{ relation.description }}</td>
+                                    <td width="100%">{{ relation.description }}{% if relation.remove %} (otherwise these will be removed){% endif %}</td>
                                 </tr>
                             {% endfor %}
                         </table>

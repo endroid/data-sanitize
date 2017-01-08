@@ -36,7 +36,6 @@ class Task
 
     /**
      * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Project", inversedBy="tasks", cascade={"persist"})
-     * @ORM\JoinColumn(nullable=false)
      */
     protected $project;
 

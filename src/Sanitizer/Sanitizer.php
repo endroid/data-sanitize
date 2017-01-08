@@ -9,6 +9,7 @@
 
 namespace Endroid\Bundle\DataSanitizeBundle\Sanitizer;
 
+use Doctrine\DBAL\Platforms\MySqlPlatform;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionClass;
@@ -53,25 +54,35 @@ class Sanitizer
         foreach ($sources as $source) {
             if ($target !== $source) {
                 foreach ($relations as $key => $relation) {
-                    if (isset($strategy[$key])) {
-                        switch ($relation['join']) {
-                            case self::JOIN_TYPE_TABLE:
-                                $items = $source->{'get'.ucfirst($relation['property'])}();
+                    switch ($relation['join']) {
+                        case self::JOIN_TYPE_TABLE:
+                            if (isset($strategy[$key])) {
+                                $items = $source->{'get' . ucfirst($relation['property'])}();
                                 foreach ($items as $item) {
-                                    $target->{'add'.ucfirst(substr($relation['property'], 0, -1))}($item);
+                                    $target->{'add' . ucfirst(substr($relation['property'], 0, -1))}($item);
                                 }
-                                break;
-                            case self::JOIN_TYPE_COLUMN:
+                            }
+                            break;
+                        case self::JOIN_TYPE_COLUMN:
+                            if (isset($strategy[$key])) {
+                                // Copy to target entity
                                 $queryBuilder = $this->manager->createQueryBuilder();
                                 $queryBuilder
                                     ->update($relation['source'], 'source')
-                                    ->set('source.'.$relation['property'], $target->getId())
-                                    ->where('source.'.$relation['property'].' = :target')
+                                    ->set('source.' . $relation['property'], $target->getId())
+                                    ->where('source.' . $relation['property'] . ' = :target')
                                     ->setParameter('target', $source->getId())
                                     ->getQuery()->execute();
-                                break;
-                        }
-                        $this->manager->remove($source);
+                            } elseif ($relation['remove'] && !$relation['orphanRemoval']) {
+                                // Remove from target entity
+                                $queryBuilder = $this->manager->createQueryBuilder();
+                                $queryBuilder
+                                    ->delete($relation['source'], 'source')
+                                    ->where('source.' . $relation['property'] . ' = :target')
+                                    ->setParameter('target', $source->getId())
+                                    ->getQuery()->execute();
+                            }
+                            break;
                     }
                 }
                 $this->manager->remove($source);
@@ -102,28 +113,73 @@ class Sanitizer
                         $relations[$key] = [
                             'id' => $key,
                             'join' => self::JOIN_TYPE_TABLE,
+                            'table' => $meta->table['name'],
+                            'column' => null,
                             'property' => $mapping['fieldName'],
                             'source' => $mapping['sourceEntity'],
                             'target' => $mapping['targetEntity'],
-                            'description' => 'Copy '.$name,
+                            'remove' => false,
+                            'orphanRemoval' => $mapping['orphanRemoval'],
+                            'description' => 'Copy '.$name.' to target entity',
                         ];
                     } elseif (isset($mapping['joinColumns'])) {
-                        $key = $meta->table['name'] . '.' . $mapping['fieldName'];
+                        $key = $meta->table['name'] . '.' . $mapping['joinColumns'][0]['name'];
                         $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
                         $relations[$key] = [
                             'id' => $key,
                             'join' => self::JOIN_TYPE_COLUMN,
+                            'table' => $meta->table['name'],
+                            'column' => $mapping['joinColumns'][0]['name'],
                             'property' => $mapping['fieldName'],
                             'source' => $mapping['sourceEntity'],
                             'target' => $mapping['targetEntity'],
-                            'description' => 'Copy '.$name,
+                            'remove' => false,
+                            'orphanRemoval' => $mapping['orphanRemoval'],
+                            'description' => 'Copy '.$name.' to target entity',
                         ];
+
+                        if ($this->hasForeignKey($relations[$key])) {
+                            $relations[$key]['remove'] = true;
+                        }
                     }
                 }
             }
         }
 
         return $relations;
+    }
+
+    /**
+     * @param array $relation
+     * @return bool
+     */
+    protected function hasForeignKey(array $relation)
+    {
+        $platform = $this->manager->getConnection()->getDatabasePlatform();
+
+        if (!$platform instanceof MySqlPlatform) {
+            return false;
+        }
+
+        // Query all foreign keys on table.column
+        $query = "
+            SELECT
+                *
+            FROM
+                information_schema.TABLE_CONSTRAINTS AS tc,
+                information_schema.KEY_COLUMN_USAGE kcu
+            WHERE
+                tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+                    AND
+                tc.CONSTRAINT_TYPE = 'FOREIGN KEY'
+                    AND
+                tc.TABLE_SCHEMA = DATABASE()
+                    AND
+                tc.TABLE_NAME = '".$relation['table']."'
+                    AND
+                kcu.COLUMN_NAME = '".$relation['column']."'";
+
+        return $this->manager->getConnection()->executeQuery($query)->rowCount() > 0;
     }
 
     /**
