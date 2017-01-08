@@ -115,12 +115,13 @@ class Sanitizer
                             'join' => self::JOIN_TYPE_TABLE,
                             'table' => $meta->table['name'],
                             'column' => null,
-                            'property' => $mapping['fieldName'],
+                            'property' => $name,
                             'source' => $mapping['sourceEntity'],
                             'target' => $mapping['targetEntity'],
                             'remove' => false,
                             'orphanRemoval' => $mapping['orphanRemoval'],
                             'description' => 'Copy '.$name.' to target entity',
+                            'meta' => $meta,
                         ];
                     } elseif (isset($mapping['joinColumns'])) {
                         $key = $meta->table['name'] . '.' . $mapping['joinColumns'][0]['name'];
@@ -136,6 +137,7 @@ class Sanitizer
                             'remove' => false,
                             'orphanRemoval' => $mapping['orphanRemoval'],
                             'description' => 'Copy '.$name.' to target entity',
+                            'meta' => $meta,
                         ];
 
                         if ($this->hasForeignKey($relations[$key])) {
