@@ -56,7 +56,24 @@ EndroidDataSanitizeBundle:
 ## Configuration
 
 By default entities and relations are derived from their doctrine class meta
-data. However you can also create your own configuration.
+data. In the configuration you define the entities and properties to list.
+
+``` yml
+endroid_data_sanitize:
+    entities:
+        project:
+            class: Endroid\Bundle\DataSanitizeBundle\Entity\Project
+            list: [ 'id', 'name' ]
+            edit: [ 'name' ]
+        task:
+            class: Endroid\Bundle\DataSanitizeBundle\Entity\Task
+            list: [ 'id', 'name', 'project', 'user' ]
+            edit: [ 'name' ]
+        user:
+            class: Endroid\Bundle\DataSanitizeBundle\Entity\User
+            list: [ 'id', 'name' ]
+            edit: [ 'name' ]
+```
 
 ## Versioning
 
