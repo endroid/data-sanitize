@@ -40,6 +40,12 @@
                     </div>
                     <div class="box-body">
                         <table class="table table-bordered">
+                            <tr>
+                                <th></th>
+                                {% for field in listFields %}
+                                    <th>{{ field }}</th>
+                                {% endfor %}
+                            </tr>
                             {% for entity in entities %}
                                 <tr>
                                     <td width="20px"><input type="checkbox" name="selected[]" value="{{ entity.id }}"{% if entity.id in selected|keys %} checked="checked"{% endif %} /></td>

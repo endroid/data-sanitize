@@ -65,7 +65,7 @@ class Sanitizer
                                 $query = "SELECT ".$relation['relation_column']." FROM ".$relation['table']." WHERE ".$relation['subject_column']." IN (".$source->getId().",".$target->getId().") GROUP BY ".$relation['relation_column']." HAVING COUNT(".$relation['relation_column'].") = 2;";
                                 $doubles = $this->manager->getConnection()->executeQuery($query)->fetchAll();
                                 foreach ($doubles as &$double) {
-                                    $double = (int) $double['task_id'];
+                                    $double = (int) $double[$relation['relation_column']];
                                 }
                                 if (count($doubles) > 0) {
                                     $query = "DELETE FROM ".$relation['table']." WHERE ".$relation['subject_column']." = ".$target->getId()." AND ".$relation['relation_column']." IN (" . implode(",", $doubles) . ");";
@@ -81,7 +81,7 @@ class Sanitizer
                             if (isset($strategy[$key])) {
                                 $query = "UPDATE ".$relation['table']." SET ".$relation['column']." = ".$target->getId()." WHERE ".$relation['column']." = ".$source->getId().";";
                                 $this->manager->getConnection()->executeUpdate($query);
-                            } elseif ($relation['required'] && !$relation['orphanRemoval']) {
+                            } elseif ($relation['required']) {
                                 $query = "DELETE FROM ".$relation['table']." WHERE ".$relation['column']." = ".$source->getId().";";
                                 $this->manager->getConnection()->executeUpdate($query);
                             }
