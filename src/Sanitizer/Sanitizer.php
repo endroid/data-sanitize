@@ -62,27 +62,27 @@ class Sanitizer
                                 // @todo enclose in single transaction allowing rollback
 
                                 // 1. Avoid creating duplicates by first removing rows for entries that have both relations
-                                $query = "SELECT ".$relation['relation_column']." FROM ".$relation['table']." WHERE ".$relation['subject_column']." IN (".$source->getId().",".$target->getId().") GROUP BY ".$relation['relation_column']." HAVING COUNT(".$relation['relation_column'].") = 2;";
+                                $query = "SELECT `".$relation['relation_column']."` FROM `".$relation['table']."` WHERE `".$relation['subject_column']."` IN ('".$source->getId()."','".$target->getId()."') GROUP BY `".$relation['relation_column']."` HAVING COUNT(`".$relation['relation_column']."`) = 2;";
                                 $doubles = $this->manager->getConnection()->executeQuery($query)->fetchAll();
                                 foreach ($doubles as &$double) {
-                                    $double = (int) $double[$relation['relation_column']];
+                                    $double = $double[$relation['relation_column']];
                                 }
                                 if (count($doubles) > 0) {
-                                    $query = "DELETE FROM ".$relation['table']." WHERE ".$relation['subject_column']." = ".$target->getId()." AND ".$relation['relation_column']." IN (" . implode(",", $doubles) . ");";
+                                    $query = "DELETE FROM `".$relation['table']."` WHERE `".$relation['subject_column']."` = '".$target->getId()."' AND `".$relation['relation_column']."` IN ('" . implode("','", $doubles) . "');";
                                     $this->manager->getConnection()->executeUpdate($query);
                                 }
 
                                 // 2. Update relations
-                                $query = "UPDATE ".$relation['table']." SET ".$relation['subject_column']." = ".$target->getId()." WHERE ".$relation['subject_column']." = ".$source->getId().";";
+                                $query = "UPDATE `".$relation['table']."` SET `".$relation['subject_column']."` = '".$target->getId()."' WHERE `".$relation['subject_column']."` = '".$source->getId()."';";
                                 $this->manager->getConnection()->executeUpdate($query);
                             }
                             break;
                         case self::JOIN_TYPE_COLUMN:
                             if (isset($strategy[$key])) {
-                                $query = "UPDATE ".$relation['table']." SET ".$relation['column']." = ".$target->getId()." WHERE ".$relation['column']." = ".$source->getId().";";
+                                $query = "UPDATE `".$relation['table']."` SET `".$relation['column']."` = '".$target->getId()."' WHERE `".$relation['column']."` = '".$source->getId()."';";
                                 $this->manager->getConnection()->executeUpdate($query);
                             } elseif ($relation['required']) {
-                                $query = "DELETE FROM ".$relation['table']." WHERE ".$relation['column']." = ".$source->getId().";";
+                                $query = "DELETE FROM `".$relation['table']."` WHERE `".$relation['column']."` = '".$source->getId()."';";
                                 $this->manager->getConnection()->executeUpdate($query);
                             }
                             break;
