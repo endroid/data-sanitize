@@ -34,7 +34,7 @@ class LoadData extends AbstractFixture
         $tags = [];
         for ($t = 1; $t <= $tagCount; $t++) {
             $tag = new Tag();
-            $tag->setName('Type '.$t);
+            $tag->setName('Tag '.$t);
             $tags[$t] = $tag;
         }
 

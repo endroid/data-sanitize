@@ -1,5 +1,5 @@
-<ul class="sidebar-menu">
+<ul class="nav nav-pills flex-column">
     {% for item in menu %}
-        <li class="active"><a href="{{ item.url }}"><i class="fa fa-link"></i> <span>{{ item.label }}</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ item.url }}">{{ item.label }}</a></li>
     {% endfor %}
 </ul>

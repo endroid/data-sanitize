@@ -17,9 +17,6 @@
                 <div class="box">
                     <div class="box-header with-border">
                         <h3 class="box-title">Merge strategy</h3>
-                        <div class="box-tools pull-right">
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                        </div>
                     </div>
                     <div class="box-body">
                         <table class="table table-bordered">
@@ -50,7 +47,7 @@
                                         <td>
                                             {% if attribute(entity, field) is iterable %}
                                                 {% for value in attribute(entity, field) %}
-                                                    {{ value }}
+                                                    {{ value }}{% if not loop.last %},{% endif %}
                                                 {% endfor %}
                                             {% else %}
                                                 {{ attribute(entity, field) }}
@@ -83,7 +80,7 @@
                                         <td>
                                             {% if attribute(entity, field) is iterable %}
                                                 {% for value in attribute(entity, field) %}
-                                                    {{ value }}
+                                                    {{ value }}{% if not loop.last %},{% endif %}
                                                 {% endfor %}
                                             {% else %}
                                                 {{ attribute(entity, field) }}
@@ -96,47 +93,46 @@
                     </div>
                 </div>
             </div>
-
         </form>
-        <form method="post">
 
-            <div class="col-md-4">
-                <div class="box">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Edit data</h3>
-                    </div>
-                    <div class="box-body">
-                        <table class="table table-bordered">
-                            {% if target is not empty %}
+        <div class="col-md-4">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Edit data</h3>
+                </div>
+                <div class="box-body">
+                    <form method="post">
+                    <table class="table table-bordered">
+                        {% if target is not empty %}
+                            <tr>
+                                <td><strong>id</strong></td>
+                                <td width="100%">{{ target.id }}</td>
+                            </tr>
+                            {% for field in editFields %}
                                 <tr>
-                                    <td><strong>id</strong></td>
-                                    <td width="100%">{{ target.id }}</td>
+                                    <td><strong>{{ field }}</strong></td>
+                                    <td width="100%">
+                                        {% if attribute(target, field) is iterable %}
+                                            {% for value in attribute(target, field) %}
+                                                {{ value }}{% if not loop.last %},{% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            {{ attribute(target, field) }}
+                                        {% endif %}
+                                    </td>
                                 </tr>
-                                {% for field in editFields %}
-                                    <tr>
-                                        <td><strong>{{ field }}</strong></td>
-                                        <td width="100%">
-                                            {% if attribute(target, field) is iterable %}
-                                                {% for value in attribute(target, field) %}
-                                                    {{ value }}
-                                                {% endfor %}
-                                            {% else %}
-                                                {{ attribute(target, field) }}
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                <tr>
-                                    <td></td>
-                                    <td><input type="submit" value="Merge" /></td>
-                                </tr>
-                            {% endif %}
-                        </table>
-                    </div>
+                            {% endfor %}
+                            <tr>
+                                <td></td>
+                                <td><input type="submit" value="Merge" /></td>
+                            </tr>
+                        {% endif %}
+                    </table>
+                    </form>
                 </div>
             </div>
         </div>
 
-    </form>
+    </div>
 
 {% endblock %}

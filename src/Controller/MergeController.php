@@ -44,12 +44,6 @@ class MergeController extends Controller
             return $this->redirectToRoute('endroid_datasanitize_merge_index', [ 'name' => $name ]);
         }
 
-        foreach ($relations as $key => $relation) {
-            if ($relation['join'] == Sanitizer::JOIN_TYPE_COLUMN && $relation['source'] === $class) {
-                unset($relations[$key]);
-            }
-        }
-
         return [
             'name' => $name,
             'class' => $class,

@@ -58,44 +58,32 @@ class Sanitizer
                         case self::JOIN_TYPE_TABLE:
                             if (isset($strategy[$key])) {
 
-                                // assign existing relations to target
-                                $query = "
-                                    UPDATE
-                                        `".$relation['table']."`
-                                    SET
-                                        `".
+                                // @todo move to Mysql Adapter
+                                // @todo enclose in single transaction allowing rollback
 
-                                // remove source
+                                // 1. Avoid creating duplicates by first removing rows for entries that have both relations
+                                $query = "SELECT ".$relation['relation_column']." FROM ".$relation['table']." WHERE ".$relation['subject_column']." IN (".$source->getId().",".$target->getId().") GROUP BY ".$relation['relation_column']." HAVING COUNT(".$relation['relation_column'].") = 2;";
+                                $doubles = $this->manager->getConnection()->executeQuery($query)->fetchAll();
+                                foreach ($doubles as &$double) {
+                                    $double = (int) $double['task_id'];
+                                }
+                                if (count($doubles) > 0) {
+                                    $query = "DELETE FROM ".$relation['table']." WHERE ".$relation['subject_column']." = ".$target->getId()." AND ".$relation['relation_column']." IN (" . implode(",", $doubles) . ");";
+                                    $this->manager->getConnection()->executeUpdate($query);
+                                }
 
-
-
-
-                                dump($relation);
-                                die;
-//                                $items = $source->{'get' . ucfirst($relation['property'])}();
-//                                foreach ($items as $item) {
-//                                    $target->{'add' . ucfirst(substr($relation['property'], 0, -1))}($item);
-//                                }
+                                // 2. Update relations
+                                $query = "UPDATE ".$relation['table']." SET ".$relation['subject_column']." = ".$target->getId()." WHERE ".$relation['subject_column']." = ".$source->getId().";";
+                                $this->manager->getConnection()->executeUpdate($query);
                             }
                             break;
                         case self::JOIN_TYPE_COLUMN:
                             if (isset($strategy[$key])) {
-                                // Copy to target entity
-                                $queryBuilder = $this->manager->createQueryBuilder();
-                                $queryBuilder
-                                    ->update($relation['source'], 'source')
-                                    ->set('source.' . $relation['property'], $target->getId())
-                                    ->where('source.' . $relation['property'] . ' = :target')
-                                    ->setParameter('target', $source->getId())
-                                    ->getQuery()->execute();
-                            } elseif ($relation['remove'] && !$relation['orphanRemoval']) {
-                                // Remove from target entity
-                                $queryBuilder = $this->manager->createQueryBuilder();
-                                $queryBuilder
-                                    ->delete($relation['source'], 'source')
-                                    ->where('source.' . $relation['property'] . ' = :target')
-                                    ->setParameter('target', $source->getId())
-                                    ->getQuery()->execute();
+                                $query = "UPDATE ".$relation['table']." SET ".$relation['column']." = ".$target->getId()." WHERE ".$relation['column']." = ".$source->getId().";";
+                                $this->manager->getConnection()->executeUpdate($query);
+                            } elseif ($relation['required'] && !$relation['orphanRemoval']) {
+                                $query = "DELETE FROM ".$relation['table']." WHERE ".$relation['column']." = ".$source->getId().";";
+                                $this->manager->getConnection()->executeUpdate($query);
                             }
                             break;
                     }
@@ -126,69 +114,30 @@ class Sanitizer
                         $key = $mapping['joinTable']['name'];
                         $relation = $mapping['sourceEntity'] == $class ? $mapping['targetEntity'] : $mapping['sourceEntity'];
                         $relationClass = new ReflectionClass($relation);
-
-                        dump($mapping);
-
                         $relations[$key] = [
                             'id' => $key,
                             'join' => self::JOIN_TYPE_TABLE,
-                            'source_column' => '',
+                            'table' => $mapping['joinTable']['name'],
+                            'subject_column' => $mapping['sourceEntity'] == $class ? $mapping['joinTable']['joinColumns'][0]['name'] : $mapping['joinTable']['inverseJoinColumns'][0]['name'],
+                            'relation_column' => $mapping['targetEntity'] == $class ? $mapping['joinTable']['joinColumns'][0]['name'] : $mapping['joinTable']['inverseJoinColumns'][0]['name'],
                             'required' => false,
-                            'description' => 'Maintain relations with '.$relationClass->getShortName(),
+                            'description' => 'Update relations with '.$relationClass->getShortName(),
                         ];
-
-                        dump($relations[$key]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//                        $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
-//                        $relations[$key] = [
-//                            'id' => $key,
-//                            'join' => self::JOIN_TYPE_TABLE,
-//                            'table' => $meta->table['name'],
-//                            'column' => null,
-//                            'property' => $name,
-//                            'source' => $mapping['sourceEntity'],
-//                            'target' => $mapping['targetEntity'],
-//                            'remove' => false,
-//                            'orphanRemoval' => $mapping['orphanRemoval'],
-//                            'meta' => $meta,
-//                        ];
-//
-//                        dump($relations[$key]);
-//                        die;
-                    } elseif (isset($mapping['joinColumns'])) {
+                    } elseif (isset($mapping['joinColumns']) && $mapping['targetEntity'] == $class) {
                         $key = $meta->table['name'] . '.' . $mapping['joinColumns'][0]['name'];
-                        $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
+                        $relation = $mapping['sourceEntity'] == $class ? $mapping['targetEntity'] : $mapping['sourceEntity'];
+                        $relationClass = new ReflectionClass($relation);
                         $relations[$key] = [
                             'id' => $key,
                             'join' => self::JOIN_TYPE_COLUMN,
                             'table' => $meta->table['name'],
                             'column' => $mapping['joinColumns'][0]['name'],
-                            'property' => $mapping['fieldName'],
-                            'source' => $mapping['sourceEntity'],
-                            'target' => $mapping['targetEntity'],
-                            'remove' => false,
-                            'orphanRemoval' => $mapping['orphanRemoval'],
-                            'description' => 'Copy related '.$name.' to target entity',
-                            'meta' => $meta,
+                            'required' => false,
+                            'description' => 'Update relations with '.$relationClass->getShortName(),
                         ];
 
                         if ($this->hasForeignKey($relations[$key])) {
-                            $relations[$key]['remove'] = true;
+                            $relations[$key]['required'] = true;
                         }
                     }
                 }
