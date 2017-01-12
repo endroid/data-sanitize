@@ -9,6 +9,7 @@
 
 namespace Endroid\Bundle\DataSanitizeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -30,6 +31,16 @@ class Task
     protected $name;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Tag", cascade={"persist"})
+     * @ORM\JoinTable(
+     *      name="data_sanitize_example_task_tag",
+     *      joinColumns={@ORM\JoinColumn(name="task_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
+     * )
+     */
+    protected $tags;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\User", inversedBy="tasks", cascade={"persist"})
      */
     protected $user;
@@ -38,6 +49,14 @@ class Task
      * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Project", inversedBy="tasks", cascade={"persist"})
      */
     protected $project;
+
+    /**
+     * Creates a new instance.
+     */
+    public function __construct()
+    {
+        $this->tags = new ArrayCollection();
+    }
 
     /**
      * @return int
@@ -61,6 +80,22 @@ class Task
     public function setName($name)
     {
         $this->name = $name;
+    }
+
+    /**
+     * @return Tag[]
+     */
+    public function getTags()
+    {
+        return $this->tags->toArray();
+    }
+
+    /**
+     * @param Tag[] $tags
+     */
+    public function setTags(array $tags)
+    {
+        $this->tags = $tags;
     }
 
     /**

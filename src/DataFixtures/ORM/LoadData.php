@@ -11,11 +11,9 @@ namespace Endroid\Bundle\DataSanitizeBundle\DataFixtures\ORM;
 
 use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Common\Persistence\ObjectManager;
-use Endroid\Bundle\DataSanitizeBundle\Entity\League;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Player;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Project;
+use Endroid\Bundle\DataSanitizeBundle\Entity\Tag;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Task;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Team;
 use Endroid\Bundle\DataSanitizeBundle\Entity\User;
 
 class LoadData extends AbstractFixture
@@ -28,9 +26,17 @@ class LoadData extends AbstractFixture
         $projectCount = 8;
         $projectUserCount = 5;
         $userTaskCount = 3;
+        $tagCount = 3;
 
         $currentUser = 1;
         $currentTask = 1;
+
+        $tags = [];
+        for ($t = 1; $t <= $tagCount; $t++) {
+            $tag = new Tag();
+            $tag->setName('Type '.$t);
+            $tags[$t] = $tag;
+        }
 
         for ($p = 1; $p <= $projectCount; $p++) {
             $project = new Project();
@@ -41,6 +47,7 @@ class LoadData extends AbstractFixture
                 for ($t = 1; $t <= $userTaskCount; $t++) {
                     $task = new Task();
                     $task->setName('Task '.$currentTask);
+                    $task->setTags($tags);
                     $user->addTask($task);
                     $project->addTask($task);
                     $currentTask++;

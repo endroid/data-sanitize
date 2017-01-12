@@ -26,7 +26,7 @@
                             {% for relation in relations %}
                                 <tr>
                                     <td><input name="strategy[{{ relation.id }}]" type="checkbox" value="1"{% if relation.id in strategy|keys %} checked="checked"{% endif %} /></td>
-                                    <td width="100%">{{ relation.description }}{% if relation.remove %} (otherwise these will be removed){% endif %}</td>
+                                    <td width="100%">{{ relation.description }}{% if relation.required %} (otherwise these will be removed){% endif %}</td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -47,7 +47,15 @@
                                 <tr>
                                     <td width="20px"><input type="checkbox" name="selected[]" value="{{ entity.id }}"{% if entity.id in selected|keys %} checked="checked"{% endif %} /></td>
                                     {% for field in listFields %}
-                                        <td>{{ attribute(entity, field) }}</td>
+                                        <td>
+                                            {% if attribute(entity, field) is iterable %}
+                                                {% for value in attribute(entity, field) %}
+                                                    {{ value }}
+                                                {% endfor %}
+                                            {% else %}
+                                                {{ attribute(entity, field) }}
+                                            {% endif %}
+                                        </td>
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -72,7 +80,15 @@
                                 {% for index, field in editFields %}
                                     <tr>
                                         <td><strong>{{ field }}</strong></td>
-                                        <td>{{ attribute(entity, field) }}</td>
+                                        <td>
+                                            {% if attribute(entity, field) is iterable %}
+                                                {% for value in attribute(entity, field) %}
+                                                    {{ value }}
+                                                {% endfor %}
+                                            {% else %}
+                                                {{ attribute(entity, field) }}
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </table>
@@ -99,7 +115,15 @@
                                 {% for field in editFields %}
                                     <tr>
                                         <td><strong>{{ field }}</strong></td>
-                                        <td width="100%">{{ attribute(target, field) }}</td>
+                                        <td width="100%">
+                                            {% if attribute(target, field) is iterable %}
+                                                {% for value in attribute(target, field) %}
+                                                    {{ value }}
+                                                {% endfor %}
+                                            {% else %}
+                                                {{ attribute(target, field) }}
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                 {% endfor %}
                                 <tr>

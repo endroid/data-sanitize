@@ -73,7 +73,7 @@ class MergeController extends Controller
         $config = $this->getSanitizer()->getConfig();
         foreach ($config as $name => $entityConfig) {
             $menu[] = [
-                'label' => $name,
+                'label' => ucfirst(str_replace('_', ' ', $name)),
                 'url' => $this->generateUrl('endroid_datasanitize_merge_index', ['name' => $name])
             ];
         }

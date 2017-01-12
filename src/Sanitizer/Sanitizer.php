@@ -57,10 +57,25 @@ class Sanitizer
                     switch ($relation['join']) {
                         case self::JOIN_TYPE_TABLE:
                             if (isset($strategy[$key])) {
-                                $items = $source->{'get' . ucfirst($relation['property'])}();
-                                foreach ($items as $item) {
-                                    $target->{'add' . ucfirst(substr($relation['property'], 0, -1))}($item);
-                                }
+
+                                // assign existing relations to target
+                                $query = "
+                                    UPDATE
+                                        `".$relation['table']."`
+                                    SET
+                                        `".
+
+                                // remove source
+
+
+
+
+                                dump($relation);
+                                die;
+//                                $items = $source->{'get' . ucfirst($relation['property'])}();
+//                                foreach ($items as $item) {
+//                                    $target->{'add' . ucfirst(substr($relation['property'], 0, -1))}($item);
+//                                }
                             }
                             break;
                         case self::JOIN_TYPE_COLUMN:
@@ -109,20 +124,52 @@ class Sanitizer
                 if ($mapping['targetEntity'] == $class || $mapping['sourceEntity'] == $class) {
                     if (isset($mapping['joinTable']['name'])) {
                         $key = $mapping['joinTable']['name'];
-                        $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
+                        $relation = $mapping['sourceEntity'] == $class ? $mapping['targetEntity'] : $mapping['sourceEntity'];
+                        $relationClass = new ReflectionClass($relation);
+
+                        dump($mapping);
+
                         $relations[$key] = [
                             'id' => $key,
                             'join' => self::JOIN_TYPE_TABLE,
-                            'table' => $meta->table['name'],
-                            'column' => null,
-                            'property' => $name,
-                            'source' => $mapping['sourceEntity'],
-                            'target' => $mapping['targetEntity'],
-                            'remove' => false,
-                            'orphanRemoval' => $mapping['orphanRemoval'],
-                            'description' => 'Copy '.$name.' to target entity',
-                            'meta' => $meta,
+                            'source_column' => '',
+                            'required' => false,
+                            'description' => 'Maintain relations with '.$relationClass->getShortName(),
                         ];
+
+                        dump($relations[$key]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//                        $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
+//                        $relations[$key] = [
+//                            'id' => $key,
+//                            'join' => self::JOIN_TYPE_TABLE,
+//                            'table' => $meta->table['name'],
+//                            'column' => null,
+//                            'property' => $name,
+//                            'source' => $mapping['sourceEntity'],
+//                            'target' => $mapping['targetEntity'],
+//                            'remove' => false,
+//                            'orphanRemoval' => $mapping['orphanRemoval'],
+//                            'meta' => $meta,
+//                        ];
+//
+//                        dump($relations[$key]);
+//                        die;
                     } elseif (isset($mapping['joinColumns'])) {
                         $key = $meta->table['name'] . '.' . $mapping['joinColumns'][0]['name'];
                         $name = $class == $mapping['sourceEntity'] ? $mapping['fieldName'] : $mapping['inversedBy'];
@@ -136,7 +183,7 @@ class Sanitizer
                             'target' => $mapping['targetEntity'],
                             'remove' => false,
                             'orphanRemoval' => $mapping['orphanRemoval'],
-                            'description' => 'Copy '.$name.' to target entity',
+                            'description' => 'Copy related '.$name.' to target entity',
                             'meta' => $meta,
                         ];
 
