@@ -123,7 +123,7 @@ class Sanitizer
                             'required' => false,
                             'description' => 'Update relations with '.$relationClass->getShortName(),
                         ];
-                    } elseif (isset($mapping['joinColumns']) && $mapping['targetEntity'] == $class) {
+                    } elseif (isset($mapping['joinColumns']) && count($mapping['joinColumns']) > 0 && $mapping['targetEntity'] == $class) {
                         $key = $meta->table['name'] . '.' . $mapping['joinColumns'][0]['name'];
                         $relation = $mapping['sourceEntity'] == $class ? $mapping['targetEntity'] : $mapping['sourceEntity'];
                         $relationClass = new ReflectionClass($relation);
@@ -201,17 +201,8 @@ class Sanitizer
      * @param string $name
      * @return array
      */
-    public function getListFields($name)
+    public function getFields($name)
     {
-        return $this->config[$name]['list'];
-    }
-
-    /**
-     * @param string $name
-     * @return array
-     */
-    public function getEditFields($name)
-    {
-        return $this->config[$name]['edit'];
+        return $this->config[$name]['fields'];
     }
 }

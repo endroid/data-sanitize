@@ -63,16 +63,13 @@ endroid_data_sanitize:
     entities:
         project:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\Project
-            list: [ 'id', 'name' ]
-            edit: [ 'name' ]
+            fields: [ 'name' ]
         task:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\Task
-            list: [ 'id', 'name', 'project', 'user' ]
-            edit: [ 'name' ]
+            fields: [ 'name' ]
         user:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\User
-            list: [ 'id', 'name' ]
-            edit: [ 'name' ]
+            fields: [ 'name' ]
 ```
 
 ## Versioning

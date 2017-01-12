@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @Route("/{name}")
+ * @Route("/")
  */
 class MergeController extends Controller
 {
@@ -26,11 +26,22 @@ class MergeController extends Controller
      * @Route("/")
      * @Template()
      *
+     * @return array|Response
+     */
+    public function indexAction()
+    {
+        return [];
+    }
+
+    /**
+     * @Route("/{name}")
+     * @Template()
+     *
      * @param Request $request
      * @param $name
      * @return array|Response
      */
-    public function indexAction(Request $request, $name)
+    public function mergeAction(Request $request, $name)
     {
         $class = $this->getSanitizer()->getClass($name);
         $strategy = (array) $request->query->get('strategy');
@@ -41,7 +52,12 @@ class MergeController extends Controller
 
         if ($request->getMethod() == 'POST') {
             $this->getSanitizer()->sanitize($name, $selected, $target, $strategy);
-            return $this->redirectToRoute('endroid_datasanitize_merge_index', [ 'name' => $name ]);
+            $this->addFlash('success', 'Merge completed!');
+            return $this->redirectToRoute('endroid_datasanitize_merge_merge', [ 'name' => $name ]);
+        }
+
+        foreach ($relations as $relation) {
+            $strategy[$relation['id']] = 1;
         }
 
         return [
@@ -50,10 +66,9 @@ class MergeController extends Controller
             'strategy' => $strategy,
             'relations' => $relations,
             'entities' => $entities,
-            'listFields' => $this->getSanitizer()->getListFields($name),
+            'fields' => $this->getSanitizer()->getFields($name),
             'selected' => $selected,
             'target' => $target,
-            'editFields' => $this->getSanitizer()->getEditFields($name),
         ];
     }
 
@@ -68,7 +83,7 @@ class MergeController extends Controller
         foreach ($config as $name => $entityConfig) {
             $menu[] = [
                 'label' => ucfirst(str_replace('_', ' ', $name)),
-                'url' => $this->generateUrl('endroid_datasanitize_merge_index', ['name' => $name])
+                'url' => $this->generateUrl('endroid_datasanitize_merge_merge', ['name' => $name])
             ];
         }
 
