@@ -14,8 +14,12 @@ use Endroid\Bundle\DataSanitizeBundle\Sanitizer\Sanitizer;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * @Route("/")
@@ -23,18 +27,26 @@ use Symfony\Component\HttpFoundation\Response;
 class MergeController extends Controller
 {
     /**
-     * @Route("/")
+     * @Route("/{name}", defaults={"name": null})
      * @Template()
      *
+     * @param string $name
      * @return array|Response
      */
-    public function indexAction()
+    public function indexAction($name)
     {
-        return [];
+        // Disable web profiler when using React
+        if ($this->get('profiler')) {
+            $this->get('profiler')->disable();
+        }
+
+        return [
+            'name' => $name
+        ];
     }
 
     /**
-     * @Route("/{name}")
+     * @Route("/{name}/merge")
      * @Template()
      *
      * @param Request $request
@@ -43,33 +55,57 @@ class MergeController extends Controller
      */
     public function mergeAction(Request $request, $name)
     {
-        $class = $this->getSanitizer()->getClass($name);
-        $strategy = (array) $request->query->get('strategy');
-        $relations = $this->getSanitizer()->getRelations($name);
+        $sources = $request->request->get('sources');
+        if (count($sources) == 0) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Invalid sources'
+            ]);
+        }
+
+        $target = $request->request->get('target');
+        if (is_null($target)) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Invalid target'
+            ]);
+        }
+
+        $this->getSanitizer()->sanitize($name, $sources, $target);
+
+        return new JsonResponse([
+            'success' => true
+        ]);
+    }
+
+    /**
+     * @Route("/{name}/state")
+     * @Template()
+     *
+     * @param $name
+     * @return JsonResponse
+     */
+    public function stateAction($name)
+    {
         $entities = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findAll();
-        $selected = $this->filter($entities, (array) $request->query->get('selected'));
-        $target = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findOneBy(['id' => $request->query->get('target')]);
+        $fields = $this->getSanitizer()->getFields($name);
 
-        if ($request->getMethod() == 'POST') {
-            $this->getSanitizer()->sanitize($name, $selected, $target, $strategy);
-            $this->addFlash('success', 'Merge completed!');
-            return $this->redirectToRoute('endroid_datasanitize_merge_merge', [ 'name' => $name ]);
+        foreach ($entities as &$entity) {
+            $data = ['id' => $entity->getId()];
+            foreach ($fields as $field) {
+                $data[$field] = (string) $entity->{'get'.ucfirst($field)}();
+            }
+            $entity = $data;
         }
 
-        foreach ($relations as $relation) {
-            $strategy[$relation['id']] = 1;
-        }
-
-        return [
-            'name' => $name,
-            'class' => $class,
-            'strategy' => $strategy,
-            'relations' => $relations,
+        $state = [
             'entities' => $entities,
-            'fields' => $this->getSanitizer()->getFields($name),
-            'selected' => $selected,
-            'target' => $target,
+            'fields' => $fields,
+            'sources' => [],
+            'target' => null,
         ];
+
+        return new JsonResponse($state);
     }
 
     /**
@@ -83,7 +119,7 @@ class MergeController extends Controller
         foreach ($config as $name => $entityConfig) {
             $menu[] = [
                 'label' => ucfirst(str_replace('_', ' ', $name)),
-                'url' => $this->generateUrl('endroid_datasanitize_merge_merge', ['name' => $name])
+                'url' => $this->generateUrl('endroid_datasanitize_merge_index', ['name' => $name])
             ];
         }
 

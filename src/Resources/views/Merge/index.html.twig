@@ -5,5 +5,55 @@
 {% endblock %}
 
 {% block page_content %}
-    Choose the entity you want to merge from the left menu.
+
+    {% if name %}
+
+        <div id="application"></div>
+
+    {% else %}
+
+        Choose the entity you want to merge from the left menu.
+
+    {% endif %}
+
+    {#<form method="get" onchange="this.submit();">#}
+
+        {#<div class="row" style="display: none;">#}
+            {#<div class="col-md-12">#}
+                {#<div class="box">#}
+                    {#<div class="box-header with-border">#}
+                        {#<h3 class="box-title">Merge strategy</h3>#}
+                    {#</div>#}
+                    {#<div class="box-body">#}
+                        {#<table class="table table-bordered">#}
+                            {#{% for relation in relations %}#}
+                                {#<tr>#}
+                                    {#<td><input name="strategy[{{ relation.id }}]" type="checkbox" value="1"{% if relation.id in strategy|keys %} checked="checked"{% endif %} /></td>#}
+                                    {#<td width="100%">{{ relation.description }}{% if relation.required %} (otherwise these will be removed){% endif %}</td>#}
+                                {#</tr>#}
+                            {#{% endfor %}#}
+                        {#</table>#}
+                    {#</div>#}
+                {#</div>#}
+            {#</div>#}
+        {#</div>#}
+
+    {#</div>#}
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {{ parent() }}
+
+    <script>
+        let appConfig = {
+            loadPath: "{{ path('endroid_datasanitize_merge_state', { name: name }) }}",
+            mergePath: "{{ path('endroid_datasanitize_merge_merge', { name: name }) }}",
+        }
+    </script>
+
+    {#<script src="http://localhost:8080/builds/index.js"></script>#}
+    <script src="{{ asset('bundles/endroiddatasanitize/builds/index.js') }}"></script>
+
 {% endblock %}
