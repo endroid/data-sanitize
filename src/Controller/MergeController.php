@@ -36,7 +36,7 @@ class MergeController extends Controller
     public function indexAction($name)
     {
         // Disable web profiler when using React
-        if ($this->get('profiler')) {
+        if ($this->has('profiler')) {
             $this->get('profiler')->disable();
         }
 
