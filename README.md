@@ -72,6 +72,15 @@ endroid_data_sanitize:
             fields: [ 'name' ]
 ```
 
+## Development
+
+In production build assets are used. Use the following commands to create a new build.
+
+``` bash
+npm install
+NODE_ENV=production node_modules/.bin/webpack
+```
+
 ## Versioning
 
 Version numbers follow the MAJOR.MINOR.PATCH scheme. Backwards compatibility
