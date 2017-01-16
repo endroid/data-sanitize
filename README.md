@@ -63,13 +63,13 @@ endroid_data_sanitize:
     entities:
         project:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\Project
-            fields: [ 'name' ]
+            fields: [ 'id', 'name' ]
         task:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\Task
-            fields: [ 'name' ]
+            fields: [ 'id', 'name' ]
         user:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\User
-            fields: [ 'name' ]
+            fields: [ 'id', 'name' ]
 ```
 
 ## Development
