@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\Serializer;
 class MergeController extends Controller
 {
     /**
-     * @Route("/{name}", defaults={"name": null})
+     * @Route("/{name}", defaults={"name": null}, requirements={"name": "[^/]*"})
      * @Template()
      *
      * @param string $name
@@ -46,8 +46,7 @@ class MergeController extends Controller
     }
 
     /**
-     * @Route("/{name}/merge")
-     * @Template()
+     * @Route("/{name}/merge", defaults={"name": null}, requirements={"name": "[^/]*"})
      *
      * @param Request $request
      * @param $name
@@ -79,8 +78,7 @@ class MergeController extends Controller
     }
 
     /**
-     * @Route("/{name}/state")
-     * @Template()
+     * @Route("/{name}/state", defaults={"name": null}, requirements={"name": "[^/]*"})
      *
      * @param $name
      * @return JsonResponse
