@@ -85,7 +85,7 @@ class MergeController extends Controller
      */
     public function stateAction($name)
     {
-        $entities = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findAll();
+        $entities = $this->getDoctrine()->getRepository($this->getSanitizer()->getClass($name))->findBy([], ['id' => 'ASC']);
         $fields = $this->getSanitizer()->getFields($name);
 
         foreach ($entities as &$entity) {
