@@ -68,13 +68,6 @@
             {{ render(controller('EndroidDataSanitizeBundle:Merge:menu')) }}
         </nav>
         <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-            {% if app.session.flashBag.has('success') %}
-                <div class="alert alert-success">
-                    {% for msg in app.session.flashBag.get('success') %}
-                        {{ msg }}
-                    {% endfor %}
-                </div>
-            {% endif %}
             <h1>{% block page_title %}{% endblock %}</h1>
             {% block page_content %}{% endblock %}
         </main>
