@@ -37,14 +37,14 @@ class Application extends React.Component {
     }
 
     onMergeClick(event) {
-        console.log(event);
         this.merge();
     }
 
     merge() {
         Request
             .post(this.props.mergePath)
-            .send({ sources: this.state.sources, target: this.state.target })
+            .type('form')
+            .send({ 'sources[]': this.state.sources, target: this.state.target })
             .then((response) => {
                 if (response.body.success) {
                     Alert.success('Merge completed!', {
