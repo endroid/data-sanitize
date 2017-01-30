@@ -64,13 +64,38 @@ endroid_data_sanitize:
         project:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\Project
             fields: [ 'id', 'name' ]
-        task:
-            class: Endroid\Bundle\DataSanitizeBundle\Entity\Task
-            fields: [ 'id', 'name' ]
         user:
             class: Endroid\Bundle\DataSanitizeBundle\Entity\User
             fields: [ 'id', 'name' ]
+        task:
+            class: Endroid\Bundle\DataSanitizeBundle\Entity\Task
+            fields: [ 'id', 'name', 'project', 'user' ]
+        tag:
+            class: Endroid\Bundle\DataSanitizeBundle\Entity\Tag
+            fields: [ 'id', 'name' ]
 ```
+
+The bundle provides some entities and fixtures that demonstrate the use. Use the
+following command to load the example data.
+ 
+``` bash
+endroid:data-sanitize:load-example-data
+```
+
+And in case you have auto mapping enabled and don't want the entities provided by
+this bundle to be included update your doctrine.orm mapping accordingly.
+
+``` yml
+doctrine:
+    orm:
+        mappings:
+            EndroidDataSanitizeBundle:
+                mapping: false
+```
+
+Then execute the following command to load the example data.
+
+
 
 ## Development
 
