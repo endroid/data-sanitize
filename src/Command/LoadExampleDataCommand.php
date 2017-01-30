@@ -7,22 +7,37 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\DataFixtures\ORM;
+namespace Endroid\Bundle\DataSanitizeBundle\Command;
 
-use Doctrine\Common\DataFixtures\AbstractFixture;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManager;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Project;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Tag;
 use Endroid\Bundle\DataSanitizeBundle\Entity\Task;
 use Endroid\Bundle\DataSanitizeBundle\Entity\User;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class LoadData extends AbstractFixture
+class LoadExampleDataCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritdoc}
      */
-    public function load(ObjectManager $manager)
+    protected function configure()
     {
+        $this
+            ->setName('endroid:data-sanitize:load-example-data')
+            ->setDescription('Loads the example')
+        ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $manager = $this->getEntityManager();
+
         $projectCount = 8;
         $projectUserCount = 5;
         $userTaskCount = 3;
@@ -59,5 +74,13 @@ class LoadData extends AbstractFixture
         }
 
         $manager->flush();
+    }
+
+    /**
+     * @return EntityManager
+     */
+    protected function getEntityManager()
+    {
+        return $this->getContainer()->get('doctrine.orm.entity_manager');
     }
 }
