@@ -1,7 +1,7 @@
 {% extends 'EndroidDataSanitizeBundle::layout.html.twig' %}
 
 {% block page_title %}
-    Merge entities
+    Merge {{ name }} entities
 {% endblock %}
 
 {% block page_content %}
@@ -15,30 +15,6 @@
         Choose the entity you want to merge from the left menu.
 
     {% endif %}
-
-    {#<form method="get" onchange="this.submit();">#}
-
-        {#<div class="row" style="display: none;">#}
-            {#<div class="col-md-12">#}
-                {#<div class="box">#}
-                    {#<div class="box-header with-border">#}
-                        {#<h3 class="box-title">Merge strategy</h3>#}
-                    {#</div>#}
-                    {#<div class="box-body">#}
-                        {#<table class="table table-bordered">#}
-                            {#{% for relation in relations %}#}
-                                {#<tr>#}
-                                    {#<td><input name="strategy[{{ relation.id }}]" type="checkbox" value="1"{% if relation.id in strategy|keys %} checked="checked"{% endif %} /></td>#}
-                                    {#<td width="100%">{{ relation.description }}{% if relation.required %} (otherwise these will be removed){% endif %}</td>#}
-                                {#</tr>#}
-                            {#{% endfor %}#}
-                        {#</table>#}
-                    {#</div>#}
-                {#</div>#}
-            {#</div>#}
-        {#</div>#}
-
-    {#</div>#}
 
 {% endblock %}
 

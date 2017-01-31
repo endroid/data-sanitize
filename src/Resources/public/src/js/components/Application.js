@@ -1,19 +1,17 @@
 import React from 'react';
 import Request from 'superagent';
-import SourceEntitySelect from './SourceEntitySelect';
-import TargetEntitySelect from './TargetEntitySelect';
-import TargetEntity from './TargetEntity';
 import Alert from 'react-s-alert';
 import 'react-s-alert/dist/s-alert-default.css';
+import EntityList from './EntityList';
 
 class Application extends React.Component {
 
     constructor(props) {
         super(props);
 
-        this.onSourceEntityChange = this.onSourceEntityChange.bind(this);
-        this.onTargetEntityChange = this.onTargetEntityChange.bind(this);
-        this.onMergeClick = this.onMergeClick.bind(this);
+        this.toggleSource = this.toggleSource.bind(this);
+        this.toggleTarget = this.toggleTarget.bind(this);
+        this.merge = this.merge.bind(this);
 
         this.loadState();
 
@@ -26,18 +24,22 @@ class Application extends React.Component {
         });
     }
 
-    onSourceEntityChange(event) {
-        this.state.sources.push(event.target.value);
+    toggleSource(id) {
+        let index = this.state.sources.indexOf(id);
+
+        if (index == -1) {
+            this.state.sources.push(id);
+        } else if (id != this.state.target) {
+            this.state.sources.splice(index, 1);
+        }
+
         this.setState(this.state);
     }
 
-    onTargetEntityChange(event) {
-        this.state.target = event.target.value;
+    toggleTarget(id) {
+        this.state.target = id;
         this.setState(this.state);
-    }
-
-    onMergeClick(event) {
-        this.merge();
+        this.toggleSource(id);
     }
 
     merge() {
@@ -46,46 +48,47 @@ class Application extends React.Component {
             .type('form')
             .send({ 'sources[]': this.state.sources, target: this.state.target })
             .then((response) => {
-                if (response.body.success) {
-                    Alert.success('Merge completed!', {
-                        position: 'bottom',
-                        timeout: 4000
-                    });
-                    this.loadState();
-                } else {
-                    Alert.warning(response.body.error, {
-                        position: 'bottom',
-                        timeout: 4000
-                    });
+                    if (response.body.success) {
+                        Alert.success('Merge completed!', {
+                            position: 'bottom',
+                            timeout: 4000
+                        });
+                        this.loadState();
+                    } else {
+                        Alert.warning(response.body.error, {
+                            position: 'bottom',
+                            timeout: 4000
+                        });
+                    }
                 }
-            }
-        );
+            );
     }
 
     render() {
-
-        let targetEntity = null;
-        let sourceEntities = [];
+        let target = null;
+        let sources = [];
         for (let entity of this.state.entities) {
             if (this.state.sources.includes(entity.id)) {
-                sourceEntities.push(entity);
+                sources.push(entity.id);
             }
             if (this.state.target == entity.id) {
-                targetEntity = entity;
+                target = entity.id;
             }
         }
 
         return (
             <div className="row">
-                <Alert stack={{limit: 3}} />
-                <div className="col-md-4">
-                    <SourceEntitySelect entities={this.state.entities} fields={this.state.fields} onChange={this.onSourceEntityChange} />
-                </div>
-                <div className="col-md-4">
-                    <TargetEntitySelect entities={sourceEntities} fields={this.state.fields} onChange={this.onTargetEntityChange} />
-                </div>
-                <div className="col-md-4">
-                    <TargetEntity entity={targetEntity} fields={this.state.fields} onClick={this.onMergeClick} />
+                <Alert stack={{ limit: 3 }} />
+                <div className="col-md-12">
+                    <EntityList
+                        entities={this.state.entities}
+                        fields={this.state.fields}
+                        sources={sources}
+                        target={target}
+                        toggleSource={this.toggleSource}
+                        toggleTarget={this.toggleTarget}
+                    />
+                    <input type="submit" onClick={() => this.merge()} value="Merge" />
                 </div>
             </div>
         );

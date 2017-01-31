@@ -1,8 +1,8 @@
 import React from 'react';
-import SourceEntitySelectOption from './SourceEntitySelectOption';
 import _ from 'lodash';
+import Entity from './Entity';
 
-class SourceEntitySelect extends React.Component {
+class EntityList extends React.Component {
 
     constructor(props) {
         super(props);
@@ -10,7 +10,7 @@ class SourceEntitySelect extends React.Component {
 
     render() {
 
-        let select = this;
+        let component = this;
 
         let headers = [];
         _.each(this.props.fields, function(field, index) {
@@ -22,21 +22,26 @@ class SourceEntitySelect extends React.Component {
         let options = [];
         _.each(this.props.entities, function(entity) {
             options.push(
-                <SourceEntitySelectOption entity={entity} fields={select.props.fields} onChange={select.props.onChange} key={entity.id} />
+                <Entity
+                    entity={entity}
+                    key={entity.id}
+                    fields={component.props.fields}
+                    isSource={component.props.sources.indexOf(entity.id) != -1}
+                    isTarget={component.props.target == entity.id}
+                    toggleSource={component.props.toggleSource}
+                    toggleTarget={component.props.toggleTarget}
+                />
             );
         });
 
         return (
             <div className="box">
-                <div className="box-header with-border">
-                    <h3 className="box-title">Select source</h3>
-                </div>
                 <div className="box-body">
-                    <table className="table table-bordered">
+                    <table className="table table-bordered" id="entity-list">
                         <thead>
                         <tr>
-                            <th>&nbsp;</th>
                             {headers}
+                            <td>&nbsp;</td>
                         </tr>
                         </thead>
                         <tbody>
@@ -49,4 +54,4 @@ class SourceEntitySelect extends React.Component {
     }
 }
 
-export default SourceEntitySelect;
+export default EntityList;
