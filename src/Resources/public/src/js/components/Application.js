@@ -43,6 +43,11 @@ class Application extends React.Component {
     }
 
     merge() {
+
+        if (this.state.target == null) {
+            return;
+        }
+
         Request
             .post(this.props.mergePath)
             .type('form')
@@ -87,8 +92,8 @@ class Application extends React.Component {
                         target={target}
                         toggleSource={this.toggleSource}
                         toggleTarget={this.toggleTarget}
+                        merge={this.merge}
                     />
-                    <input type="submit" onClick={() => this.merge()} value="Merge" />
                 </div>
             </div>
         );

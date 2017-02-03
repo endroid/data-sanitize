@@ -25,14 +25,9 @@ class Entity extends React.Component {
             style = { backgroundColor: '#FFC' };
         }
 
-        let buttons = [];
-        buttons.push(<input key="toggleSource" type="submit" onClick={() => this.props.toggleSource(this.props.entity.id)} value="Source" />);
-        buttons.push(<input key="toggleTarget" type="submit" onClick={() => this.props.toggleTarget(this.props.entity.id)} value="Target" />);
-
         return (
-            <tr style={style}>
+            <tr style={style} onClick={() => this.props.toggleSource(this.props.entity.id)} onDoubleClick={() => this.props.toggleTarget(this.props.entity.id)}>
                 {values}
-                <td>{buttons}</td>
             </tr>
         )
     }
