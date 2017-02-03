@@ -75,14 +75,19 @@ endroid_data_sanitize:
             fields: [ 'id', 'name' ]
 ```
 
-The bundle provides some entities and fixtures that demonstrate the use. Use the
-following command to load the example data.
+## Usage
+
+The bundle provides some example data to demonstrate the use. Use the following
+command to load the example data. Then import or copy the
+[example configuration](https://github.com/endroid/EndroidDataSanitizeBundle/blob/master/src/Resources/config/example.yml).
  
 ``` bash
 endroid:data-sanitize:load-example-data
 ```
 
-And in case you have auto mapping enabled and don't want the entities provided by
+## ORM Mappings
+
+In case you have auto mapping enabled and don't want the entities provided by
 this bundle to be included update your doctrine.orm mapping accordingly.
 
 ``` yml
@@ -93,13 +98,10 @@ doctrine:
                 mapping: false
 ```
 
-Then execute the following command to load the example data.
-
-
-
 ## Development
 
-In production build assets are used. Use the following commands to create a new build.
+The production version makes use of built assets. Use the following commands to
+install dependencies and create a new build.
 
 ``` bash
 npm install
