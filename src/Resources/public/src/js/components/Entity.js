@@ -5,6 +5,17 @@ class Entity extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.toggle = this.toggle.bind(this);
+    }
+
+    toggle()
+    {
+        if (this.props.isSource || this.props.isTarget) {
+            this.props.toggleTarget(this.props.entity.id);
+        }
+
+        this.props.toggleSource(this.props.entity.id);
     }
 
     render() {
@@ -26,7 +37,7 @@ class Entity extends React.Component {
         }
 
         return (
-            <tr style={style} onClick={() => this.props.toggleSource(this.props.entity.id)} onDoubleClick={() => this.props.toggleTarget(this.props.entity.id)}>
+            <tr style={style} onClick={() => this.toggle()}>
                 {values}
             </tr>
         )

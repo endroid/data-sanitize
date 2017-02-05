@@ -37,14 +37,21 @@ class Application extends React.Component {
     }
 
     toggleTarget(id) {
-        this.state.target = id;
+        if (this.state.target == id) {
+            this.state.target = null;
+        } else {
+            this.state.target = id;
+        }
         this.setState(this.state);
-        this.toggleSource(id);
     }
 
     merge() {
 
         if (this.state.target == null) {
+            return;
+        }
+
+        if (!confirm('Please confirm merge')) {
             return;
         }
 
