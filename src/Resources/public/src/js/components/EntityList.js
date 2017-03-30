@@ -65,15 +65,18 @@ class EntityList extends React.Component {
             <div className="box">
                 <div className="box-body">
                     <div className="form-group">
-                        <input type="text" onKeyUp={this.updateFilter} placeholder="Search ..." />
-                        &nbsp;
-                        <input type="submit" onClick={() => this.props.merge()} value="Merge" />
+                        <form className="form-inline">
+                            <div className="form-group">
+                                <input className="form-control" type="text" onKeyUp={this.updateFilter} placeholder="Search ..." />
+                                &nbsp;
+                                <button type="button" className="btn btn-success" onClick={() => this.props.merge()}>Merge</button>
+                            </div>
+                        </form>
                     </div>
                     <table className="table table-bordered" id="entity-list">
                         <thead>
                         <tr>
                             {headers}
-                            <td>&nbsp;</td>
                         </tr>
                         </thead>
                         <tbody>
