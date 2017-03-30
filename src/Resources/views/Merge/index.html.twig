@@ -29,7 +29,10 @@
         }
     </script>
 
-    {#<script src="http://localhost:8080/builds/index.js"></script>#}
-    <script src="{{ asset('bundles/endroiddatasanitize/builds/index.js') }}"></script>
+    {% if app.debug %}
+        <script src="http://localhost:8080/builds/index.js"></script>
+    {% else %}
+        <script src="{{ asset('bundles/endroiddatasanitize/builds/index.js') }}"></script>
+    {% endif %}
 
 {% endblock %}
