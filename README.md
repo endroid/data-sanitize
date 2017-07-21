@@ -82,7 +82,7 @@ command to load the example data. Then import or copy the
 [example configuration](https://github.com/endroid/EndroidDataSanitizeBundle/blob/master/src/Resources/config/example.yml).
  
 ``` bash
-endroid:data-sanitize:load-example-data
+bin/console endroid:data-sanitize:load-example-data
 ```
 
 ## ORM Mappings
