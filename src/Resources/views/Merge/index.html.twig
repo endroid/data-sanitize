@@ -1,38 +1,25 @@
-{% extends 'EndroidDataSanitizeBundle::layout.html.twig' %}
+{% extends '@EndroidDataSanitize/layout.html.twig' %}
 
-{% block page_title %}
-    Merge {{ name }} entities
+{% block menu %}
+    {{ render(controller('EndroidDataSanitizeBundle:Merge:menu')) }}
 {% endblock %}
 
-{% block page_content %}
-
+{% block content %}
+    <h1>Merge {{ name }} entities</h1>
     {% if name %}
-
         <div id="application"></div>
-
     {% else %}
-
         Choose the entity you want to merge from the left menu.
-
     {% endif %}
-
 {% endblock %}
 
 {% block javascripts %}
-
     {{ parent() }}
-
     <script>
         let appConfig = {
             loadPath: "{{ path('endroid_datasanitize_merge_state', { name: name }) }}",
             mergePath: "{{ path('endroid_datasanitize_merge_merge', { name: name }) }}",
         }
     </script>
-
-    {% if app.debug %}
-        <script src="http://localhost:8080/builds/index.js"></script>
-    {% else %}
-        <script src="{{ asset('bundles/endroiddatasanitize/builds/index.js') }}"></script>
-    {% endif %}
-
+    <script src="{{ preload(asset('/build/merge.js', 'endroid_data_sanitize')) }}"></script>
 {% endblock %}
