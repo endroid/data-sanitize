@@ -31,9 +31,9 @@ class Entity extends React.Component {
 
         let style = {};
         if (this.props.isTarget) {
-            style = { backgroundColor: '#CFC' };
+            style = { backgroundColor: '#28a745' };
         } else if (this.props.isSource) {
-            style = { backgroundColor: '#FFC' };
+            style = { backgroundColor: '#dc3545' };
         }
 
         return (

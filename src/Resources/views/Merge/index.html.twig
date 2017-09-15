@@ -1,5 +1,10 @@
 {% extends '@EndroidDataSanitize/layout.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ preload(asset('/build/merge.css', 'endroid_data_sanitize')) }}">
+{% endblock %}
+
 {% block menu %}
     {{ render(controller('EndroidDataSanitizeBundle:Merge:menu')) }}
 {% endblock %}

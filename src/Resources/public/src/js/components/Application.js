@@ -2,6 +2,8 @@ import React from 'react';
 import Request from 'superagent';
 import Alert from 'react-s-alert';
 import 'react-s-alert/dist/s-alert-default.css';
+import Noty from 'noty';
+import 'noty/lib/noty.css';
 import EntityList from './EntityList';
 
 class Application extends React.Component {
@@ -45,13 +47,27 @@ class Application extends React.Component {
         this.setState(this.state);
     }
 
-    merge() {
+    merge(confirmed = false) {
 
         if (this.state.target == null) {
             return;
         }
 
-        if (!confirm('Please confirm merge')) {
+        if (!confirmed) {
+            let component = this;
+            let noty = new Noty({
+                text: 'Are you sure?',
+                buttons: [
+                    Noty.button('Yes', 'btn btn-success', function () {
+                        component.merge(true);
+                        noty.close();
+                    }),
+                    Noty.button('No', 'btn btn-danger', function () {
+                        noty.close();
+                    })
+                ]
+            }).show();
+
             return;
         }
 
