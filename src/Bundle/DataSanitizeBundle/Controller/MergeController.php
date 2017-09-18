@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
 class MergeController extends Controller
 {
     /**
-     * @Route("/{name}", defaults={"name": null}, requirements={"name": "[^/]*"})
+     * @Route("/{name}", defaults={"name": null}, requirements={"name": "[^/]*"}, name="endroid_data_sanitize_merge_index")
      * @Template()
      *
      * @param string $name
@@ -42,7 +42,7 @@ class MergeController extends Controller
     }
 
     /**
-     * @Route("/{name}/merge", defaults={"name": null}, requirements={"name": "[^/]*"})
+     * @Route("/{name}/merge", defaults={"name": null}, requirements={"name": "[^/]*"}, name="endroid_data_sanitize_merge_merge")
      *
      * @param Request $request
      * @param $name
@@ -74,7 +74,7 @@ class MergeController extends Controller
     }
 
     /**
-     * @Route("/{name}/state", defaults={"name": null}, requirements={"name": "[^/]*"})
+     * @Route("/{name}/state", defaults={"name": null}, requirements={"name": "[^/]*"}, name="endroid_data_sanitize_merge_state")
      *
      * @param $name
      * @return JsonResponse
@@ -113,7 +113,7 @@ class MergeController extends Controller
         foreach ($config as $name => $entityConfig) {
             $menu[] = [
                 'label' => ucfirst(str_replace('_', ' ', $name)),
-                'url' => $this->generateUrl('endroid_datasanitize_merge_index', ['name' => $name])
+                'url' => $this->generateUrl('endroid_data_sanitize_merge_index', ['name' => $name])
             ];
         }
 
