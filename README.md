@@ -4,7 +4,7 @@ Data Sanitize
 *By [endroid](http://endroid.nl/)*
 
 [![Latest Stable Version](http://img.shields.io/packagist/v/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
-[![Build Status](http://img.shields.io/travis/endroid/EndroidDataSanitize.svg)](http://travis-ci.org/endroid/EndroidDataSanitize)
+[![Build Status](http://img.shields.io/travis/endroid/DataSanitize.svg)](http://travis-ci.org/endroid/DataSanitize)
 [![Total Downloads](http://img.shields.io/packagist/dt/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
 [![Monthly Downloads](http://img.shields.io/packagist/dm/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
 [![License](http://img.shields.io/packagist/l/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
@@ -12,7 +12,7 @@ Data Sanitize
 This bundle provides a user interface and some commands for merging and
 cleaning entities.
 
-[![knpbundles.com](http://knpbundles.com/endroid/EndroidDataSanitize/badge-short)](http://knpbundles.com/endroid/EndroidDataSanitize)
+[![knpbundles.com](http://knpbundles.com/endroid/DataSanitize/badge-short)](http://knpbundles.com/endroid/DataSanitize)
 
 ## Installation
 

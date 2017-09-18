@@ -2,7 +2,7 @@
     "name": "endroid/data-sanitize",
     "description": "Endroid Data Sanitize",
     "keywords": ["endroid", "data", "sanitize", "bundle", "symfony"],
-    "homepage": "https://github.com/endroid/EndroidDataSanitize",
+    "homepage": "https://github.com/endroid/DataSanitize",
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
