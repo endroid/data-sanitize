@@ -7,18 +7,18 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\Command;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Command;
 
 use Doctrine\ORM\EntityManager;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Project;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Tag;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Task;
-use Endroid\Bundle\DataSanitizeBundle\Entity\User;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Project;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Tag;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Task;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class LoadExampleDataCommand extends ContainerAwareCommand
+class GenerateDataCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritdoc}
@@ -26,8 +26,8 @@ class LoadExampleDataCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('endroid:data-sanitize:load-example-data')
-            ->setDescription('Loads the example')
+            ->setName('endroid:data-sanitize-demo:generate-data')
+            ->setDescription('Generate demo data')
         ;
     }
 

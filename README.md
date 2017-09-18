@@ -1,32 +1,28 @@
-Data Sanitize Bundle
-====================
+Data Sanitize
+=============
 
 *By [endroid](http://endroid.nl/)*
 
-[![Latest Stable Version](http://img.shields.io/packagist/v/endroid/data-sanitize-bundle.svg)](https://packagist.org/packages/endroid/data-sanitize-bundle)
-[![Build Status](http://img.shields.io/travis/endroid/EndroidDataSanitizeBundle.svg)](http://travis-ci.org/endroid/EndroidDataSanitizeBundle)
-[![Total Downloads](http://img.shields.io/packagist/dt/endroid/data-sanitize-bundle.svg)](https://packagist.org/packages/endroid/data-sanitize-bundle)
-[![Monthly Downloads](http://img.shields.io/packagist/dm/endroid/data-sanitize-bundle.svg)](https://packagist.org/packages/endroid/data-sanitize-bundle)
-[![License](http://img.shields.io/packagist/l/endroid/data-sanitize-bundle.svg)](https://packagist.org/packages/endroid/data-sanitize-bundle)
+[![Latest Stable Version](http://img.shields.io/packagist/v/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
+[![Build Status](http://img.shields.io/travis/endroid/EndroidDataSanitize.svg)](http://travis-ci.org/endroid/EndroidDataSanitize)
+[![Total Downloads](http://img.shields.io/packagist/dt/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
+[![Monthly Downloads](http://img.shields.io/packagist/dm/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
+[![License](http://img.shields.io/packagist/l/endroid/data-sanitize.svg)](https://packagist.org/packages/endroid/data-sanitize)
 
 This bundle provides a user interface and some commands for merging and
 cleaning entities.
 
-[![knpbundles.com](http://knpbundles.com/endroid/EndroidDataSanitizeBundle/badge-short)](http://knpbundles.com/endroid/EndroidDataSanitizeBundle)
-
-## Requirements
-
-* Symfony
+[![knpbundles.com](http://knpbundles.com/endroid/EndroidDataSanitize/badge-short)](http://knpbundles.com/endroid/EndroidDataSanitize)
 
 ## Installation
 
 Use [Composer](https://getcomposer.org/) to install the bundle.
 
 ``` bash
-$ composer require endroid/data-sanitize-bundle
+$ composer require endroid/data-sanitize
 ```
 
-Then enable the bundle via the kernel.
+Then enable the bundle via the kernel. Only add the demo bundle if you need it.
 
 ``` php
 <?php
@@ -36,7 +32,8 @@ public function registerBundles()
 {
     $bundles = [
         // ...
-        new Endroid\Bundle\DataSanitizeBundle\EndroidDataSanitizeBundle(),
+        new Endroid\DataSanitize\Bundle\DataSanitizeBundle\EndroidDataSanitizeBundle(),
+        new Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\EndroidDataSanitizeDemoBundle(),
     ];
 }
 ```
@@ -62,40 +59,26 @@ data. In the configuration you define the entities and properties to list.
 endroid_data_sanitize:
     entities:
         project:
-            class: Endroid\Bundle\DataSanitizeBundle\Entity\Project
+            class: Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Project
             fields: [ 'id', 'name' ]
         user:
-            class: Endroid\Bundle\DataSanitizeBundle\Entity\User
+            class: Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\User
             fields: [ 'id', 'name' ]
         task:
-            class: Endroid\Bundle\DataSanitizeBundle\Entity\Task
+            class: Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Task
             fields: [ 'id', 'name', 'project', 'user' ]
         tag:
-            class: Endroid\Bundle\DataSanitizeBundle\Entity\Tag
+            class: Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Tag
             fields: [ 'id', 'name' ]
 ```
 
 ## Usage
 
 The bundle provides some example data to demonstrate the use. Use the following
-command to load the example data. Then import or copy the
-[example configuration](https://github.com/endroid/EndroidDataSanitizeBundle/blob/master/src/Resources/config/example.yml).
+command to generate the example data.
  
 ``` bash
-bin/console endroid:data-sanitize:load-example-data
-```
-
-## ORM Mappings
-
-In case you have auto mapping enabled and don't want the entities provided by
-this bundle to be included update your doctrine.orm mapping accordingly.
-
-``` yml
-doctrine:
-    orm:
-        mappings:
-            EndroidDataSanitizeBundle:
-                mapping: false
+bin/console endroid:data-sanitize-demo:generate-data
 ```
 
 ## Development
