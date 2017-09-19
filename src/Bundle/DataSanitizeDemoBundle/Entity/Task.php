@@ -130,9 +130,6 @@ class Task
         $this->project = $project;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->name;

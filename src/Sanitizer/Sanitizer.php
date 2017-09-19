@@ -32,7 +32,7 @@ class Sanitizer
     /**
      * Creates a new instance.
      *
-     * @param array $config
+     * @param array         $config
      * @param EntityManager $manager
      */
     public function __construct(array $config, EntityManager $manager)
@@ -43,8 +43,8 @@ class Sanitizer
 
     /**
      * @param string $name
-     * @param array $sources
-     * @param int $target
+     * @param array  $sources
+     * @param int    $target
      */
     public function sanitize($name, array $sources, $target)
     {
@@ -60,22 +60,22 @@ class Sanitizer
                             // @todo enclose in single transaction allowing rollback
 
                             // 1. Avoid creating duplicates by first removing rows for entries that have both relations
-                            $query = "SELECT `".$relation['relation_column']."` FROM `".$relation['table']."` WHERE `".$relation['subject_column']."` IN ('".$source."','".$target."') GROUP BY `".$relation['relation_column']."` HAVING COUNT(`".$relation['relation_column']."`) = 2;";
+                            $query = 'SELECT `'.$relation['relation_column'].'` FROM `'.$relation['table'].'` WHERE `'.$relation['subject_column']."` IN ('".$source."','".$target."') GROUP BY `".$relation['relation_column'].'` HAVING COUNT(`'.$relation['relation_column'].'`) = 2;';
                             $doubles = $this->manager->getConnection()->executeQuery($query)->fetchAll();
                             foreach ($doubles as &$double) {
                                 $double = $double[$relation['relation_column']];
                             }
                             if (count($doubles) > 0) {
-                                $query = "DELETE FROM `".$relation['table']."` WHERE `".$relation['subject_column']."` = '".$target."' AND `".$relation['relation_column']."` IN ('" . implode("','", $doubles) . "');";
+                                $query = 'DELETE FROM `'.$relation['table'].'` WHERE `'.$relation['subject_column']."` = '".$target."' AND `".$relation['relation_column']."` IN ('".implode("','", $doubles)."');";
                                 $this->manager->getConnection()->executeUpdate($query);
                             }
 
                             // 2. Update relations
-                            $query = "UPDATE `".$relation['table']."` SET `".$relation['subject_column']."` = '".$target."' WHERE `".$relation['subject_column']."` = '".$source."';";
+                            $query = 'UPDATE `'.$relation['table'].'` SET `'.$relation['subject_column']."` = '".$target."' WHERE `".$relation['subject_column']."` = '".$source."';";
                             $this->manager->getConnection()->executeUpdate($query);
                             break;
                         case self::JOIN_TYPE_COLUMN:
-                            $query = "UPDATE `".$relation['table']."` SET `".$relation['column']."` = '".$target."' WHERE `".$relation['column']."` = '".$source."';";
+                            $query = 'UPDATE `'.$relation['table'].'` SET `'.$relation['column']."` = '".$target."' WHERE `".$relation['column']."` = '".$source."';";
                             $this->manager->getConnection()->executeUpdate($query);
                             break;
                     }
@@ -95,6 +95,7 @@ class Sanitizer
 
     /**
      * @param string $name
+     *
      * @return array
      */
     public function getRelations($name)
@@ -122,7 +123,7 @@ class Sanitizer
                             'description' => 'Update relations with '.$relationClass->getShortName(),
                         ];
                     } elseif (isset($mapping['joinColumns']) && count($mapping['joinColumns']) > 0 && $mapping['targetEntity'] == $class) {
-                        $key = $meta->table['name'] . '.' . $mapping['joinColumns'][0]['name'];
+                        $key = $meta->table['name'].'.'.$mapping['joinColumns'][0]['name'];
                         $relation = $mapping['sourceEntity'] == $class ? $mapping['targetEntity'] : $mapping['sourceEntity'];
                         $relationClass = new ReflectionClass($relation);
                         $relations[$key] = [
@@ -147,6 +148,7 @@ class Sanitizer
 
     /**
      * @param array $relation
+     *
      * @return bool
      */
     protected function hasForeignKey(array $relation)
@@ -188,6 +190,7 @@ class Sanitizer
 
     /**
      * @param string $name
+     *
      * @return string
      */
     public function getClass($name)
@@ -197,6 +200,7 @@ class Sanitizer
 
     /**
      * @param string $name
+     *
      * @return array
      */
     public function getFields($name)

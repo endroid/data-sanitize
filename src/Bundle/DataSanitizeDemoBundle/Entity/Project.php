@@ -99,6 +99,7 @@ class Project
 
     /**
      * @param Task $task
+     *
      * @return bool
      */
     public function hasTask(Task $task)
@@ -158,6 +159,7 @@ class Project
 
     /**
      * @param User $user
+     *
      * @return bool
      */
     public function hasUser(User $user)
@@ -191,9 +193,6 @@ class Project
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->name;

@@ -43,10 +43,10 @@ class EndroidDataSanitizeExtension extends Extension implements PrependExtension
             'assets' => [
                 'packages' => [
                     'endroid_data_sanitize' => [
-                        'json_manifest_path' => '%kernel.project_dir%/public/bundles/endroiddatasanitize/build/manifest.json'
-                    ]
-                ]
-            ]
+                        'json_manifest_path' => '%kernel.project_dir%/public/bundles/endroiddatasanitize/build/manifest.json',
+                    ],
+                ],
+            ],
         ]);
     }
 }

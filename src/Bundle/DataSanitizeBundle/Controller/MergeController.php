@@ -27,6 +27,7 @@ class MergeController extends Controller
      * @Template()
      *
      * @param string $name
+     *
      * @return array|Response
      */
     public function indexAction($name)
@@ -37,7 +38,7 @@ class MergeController extends Controller
         }
 
         return [
-            'name' => $name
+            'name' => $name,
         ];
     }
 
@@ -46,15 +47,16 @@ class MergeController extends Controller
      *
      * @param Request $request
      * @param $name
+     *
      * @return array|Response
      */
     public function mergeAction(Request $request, $name)
     {
         $sources = $request->request->get('sources');
-        if (count($sources) == 0) {
+        if (0 == count($sources)) {
             return new JsonResponse([
                 'success' => false,
-                'error' => 'Invalid sources'
+                'error' => 'Invalid sources',
             ]);
         }
 
@@ -62,14 +64,14 @@ class MergeController extends Controller
         if (is_null($target)) {
             return new JsonResponse([
                 'success' => false,
-                'error' => 'Invalid target'
+                'error' => 'Invalid target',
             ]);
         }
 
         $this->getSanitizer()->sanitize($name, $sources, $target);
 
         return new JsonResponse([
-            'success' => true
+            'success' => true,
         ]);
     }
 
@@ -77,6 +79,7 @@ class MergeController extends Controller
      * @Route("/{name}/state", defaults={"name": null}, requirements={"name": "[^/]*"}, name="endroid_data_sanitize_merge_state")
      *
      * @param $name
+     *
      * @return JsonResponse
      */
     public function stateAction($name)
@@ -113,7 +116,7 @@ class MergeController extends Controller
         foreach ($config as $name => $entityConfig) {
             $menu[] = [
                 'label' => ucfirst(str_replace('_', ' ', $name)),
-                'url' => $this->generateUrl('endroid_data_sanitize_merge_index', ['name' => $name])
+                'url' => $this->generateUrl('endroid_data_sanitize_merge_index', ['name' => $name]),
             ];
         }
 
@@ -125,6 +128,7 @@ class MergeController extends Controller
     /**
      * @param array $entities
      * @param array $ids
+     *
      * @return array
      */
     protected function filter($entities, $ids)
