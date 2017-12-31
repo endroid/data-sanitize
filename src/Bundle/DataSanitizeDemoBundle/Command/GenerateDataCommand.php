@@ -7,18 +7,18 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\Command;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Command;
 
 use Doctrine\ORM\EntityManager;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Project;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Tag;
-use Endroid\Bundle\DataSanitizeBundle\Entity\Task;
-use Endroid\Bundle\DataSanitizeBundle\Entity\User;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Project;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Tag;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Task;
+use Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class LoadExampleDataCommand extends ContainerAwareCommand
+class GenerateDataCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritdoc}
@@ -26,8 +26,8 @@ class LoadExampleDataCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('endroid:data-sanitize:load-example-data')
-            ->setDescription('Loads the example')
+            ->setName('endroid:data-sanitize-demo:generate-data')
+            ->setDescription('Generate demo data')
         ;
     }
 
@@ -47,27 +47,27 @@ class LoadExampleDataCommand extends ContainerAwareCommand
         $currentTask = 1;
 
         $tags = [];
-        for ($t = 1; $t <= $tagCount; $t++) {
+        for ($t = 1; $t <= $tagCount; ++$t) {
             $tag = new Tag();
             $tag->setName('Tag '.$t);
             $tags[$t] = $tag;
         }
 
-        for ($p = 1; $p <= $projectCount; $p++) {
+        for ($p = 1; $p <= $projectCount; ++$p) {
             $project = new Project();
             $project->setName('Project '.$p);
-            for ($u = 1; $u <= $projectUserCount; $u++) {
+            for ($u = 1; $u <= $projectUserCount; ++$u) {
                 $user = new User();
                 $user->setName('User '.$currentUser);
-                for ($t = 1; $t <= $userTaskCount; $t++) {
+                for ($t = 1; $t <= $userTaskCount; ++$t) {
                     $task = new Task();
                     $task->setName('Task '.$currentTask);
                     $task->setTags($tags);
                     $user->addTask($task);
                     $project->addTask($task);
-                    $currentTask++;
+                    ++$currentTask;
                 }
-                $currentUser++;
+                ++$currentUser;
                 $project->addUser($user);
             }
             $manager->persist($project);

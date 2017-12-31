@@ -1,5 +1,5 @@
 {
-  "name": "data-sanitize-bundle",
+  "name": "data-sanitize",
   "version": "1.0.0",
   "main": "webpack.config.js",
   "devDependencies": {

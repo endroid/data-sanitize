@@ -7,13 +7,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\Entity;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="data_sanitize_example_tag")
+ * @ORM\Table(name="data_sanitize_demo_tag")
  */
 class Tag
 {
@@ -53,9 +53,6 @@ class Tag
         $this->name = $name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->name;

@@ -7,19 +7,15 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\Controller;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeBundle\Controller;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Endroid\Bundle\DataSanitizeBundle\Sanitizer\Sanitizer;
+use Endroid\DataSanitize\Sanitizer\Sanitizer;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\Encoder\JsonEncode;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Serializer;
 
 /**
  * @Route("/")
@@ -27,10 +23,11 @@ use Symfony\Component\Serializer\Serializer;
 class MergeController extends Controller
 {
     /**
-     * @Route("/{name}", defaults={"name": null}, requirements={"name": "[^/]*"})
+     * @Route("/{name}", defaults={"name": null}, requirements={"name": "[^/]*"}, name="endroid_data_sanitize_merge_index")
      * @Template()
      *
      * @param string $name
+     *
      * @return array|Response
      */
     public function indexAction($name)
@@ -41,24 +38,25 @@ class MergeController extends Controller
         }
 
         return [
-            'name' => $name
+            'name' => $name,
         ];
     }
 
     /**
-     * @Route("/{name}/merge", defaults={"name": null}, requirements={"name": "[^/]*"})
+     * @Route("/{name}/merge", defaults={"name": null}, requirements={"name": "[^/]*"}, name="endroid_data_sanitize_merge_merge")
      *
      * @param Request $request
      * @param $name
+     *
      * @return array|Response
      */
     public function mergeAction(Request $request, $name)
     {
         $sources = $request->request->get('sources');
-        if (count($sources) == 0) {
+        if (0 == count($sources)) {
             return new JsonResponse([
                 'success' => false,
-                'error' => 'Invalid sources'
+                'error' => 'Invalid sources',
             ]);
         }
 
@@ -66,21 +64,22 @@ class MergeController extends Controller
         if (is_null($target)) {
             return new JsonResponse([
                 'success' => false,
-                'error' => 'Invalid target'
+                'error' => 'Invalid target',
             ]);
         }
 
         $this->getSanitizer()->sanitize($name, $sources, $target);
 
         return new JsonResponse([
-            'success' => true
+            'success' => true,
         ]);
     }
 
     /**
-     * @Route("/{name}/state", defaults={"name": null}, requirements={"name": "[^/]*"})
+     * @Route("/{name}/state", defaults={"name": null}, requirements={"name": "[^/]*"}, name="endroid_data_sanitize_merge_state")
      *
      * @param $name
+     *
      * @return JsonResponse
      */
     public function stateAction($name)
@@ -117,7 +116,7 @@ class MergeController extends Controller
         foreach ($config as $name => $entityConfig) {
             $menu[] = [
                 'label' => ucfirst(str_replace('_', ' ', $name)),
-                'url' => $this->generateUrl('endroid_datasanitize_merge_index', ['name' => $name])
+                'url' => $this->generateUrl('endroid_data_sanitize_merge_index', ['name' => $name]),
             ];
         }
 
@@ -129,6 +128,7 @@ class MergeController extends Controller
     /**
      * @param array $entities
      * @param array $ids
+     *
      * @return array
      */
     protected function filter($entities, $ids)

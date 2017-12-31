@@ -7,14 +7,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\Entity;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="data_sanitize_example_task")
+ * @ORM\Table(name="data_sanitize_demo_task")
  */
 class Task
 {
@@ -31,7 +31,7 @@ class Task
     protected $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Tag", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Tag", cascade={"persist"})
      * @ORM\JoinTable(
      *      name="data_sanitize_example_task_tag",
      *      joinColumns={@ORM\JoinColumn(name="task_id", referencedColumnName="id")},
@@ -41,12 +41,12 @@ class Task
     protected $tags;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\User", inversedBy="tasks", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\User", inversedBy="tasks", cascade={"persist"})
      */
     protected $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Project", inversedBy="tasks", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Project", inversedBy="tasks", cascade={"persist"})
      */
     protected $project;
 
@@ -130,9 +130,6 @@ class Task
         $this->project = $project;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->name;

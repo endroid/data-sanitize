@@ -7,7 +7,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeBundle;
 
 use PHPUnit_Framework_TestCase;
 

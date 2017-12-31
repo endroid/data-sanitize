@@ -1,9 +1,9 @@
 {
-    "name": "endroid/data-sanitize-bundle",
-    "description": "Endroid Data Sanitize Bundle",
-    "keywords": ["endroid", "data", "sanitize", "bundle"],
-    "homepage": "https://github.com/endroid/EndroidDataSanitizeBundle",
-    "type": "library",
+    "name": "endroid/data-sanitize",
+    "description": "Endroid Data Sanitize",
+    "keywords": ["endroid", "data", "sanitize", "bundle", "symfony"],
+    "homepage": "https://github.com/endroid/DataSanitize",
+    "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
@@ -20,12 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Endroid\\Bundle\\DataSanitizeBundle\\": "src/"
+            "Endroid\\DataSanitize\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Endroid\\Bundle\\DataSanitizeBundle\\Tests\\": "tests/"
+            "Endroid\\DataSanitize\\Tests\\": "tests/"
         }
     },
     "config": {

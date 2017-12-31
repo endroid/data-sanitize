@@ -22,8 +22,8 @@
     {{ parent() }}
     <script>
         let appConfig = {
-            loadPath: "{{ path('endroid_datasanitize_merge_state', { name: name }) }}",
-            mergePath: "{{ path('endroid_datasanitize_merge_merge', { name: name }) }}",
+            loadPath: "{{ path('endroid_data_sanitize_merge_state', { name: name }) }}",
+            mergePath: "{{ path('endroid_data_sanitize_merge_merge', { name: name }) }}",
         }
     </script>
     <script src="{{ preload(asset('/build/merge.js', 'endroid_data_sanitize')) }}"></script>

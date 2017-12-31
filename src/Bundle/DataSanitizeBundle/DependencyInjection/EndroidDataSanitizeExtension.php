@@ -7,7 +7,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\DependencyInjection;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
@@ -43,10 +43,10 @@ class EndroidDataSanitizeExtension extends Extension implements PrependExtension
             'assets' => [
                 'packages' => [
                     'endroid_data_sanitize' => [
-                        'json_manifest_path' => '%kernel.project_dir%/public/bundles/endroiddatasanitize/build/manifest.json'
-                    ]
-                ]
-            ]
+                        'json_manifest_path' => '%kernel.project_dir%/public/bundles/endroiddatasanitize/build/manifest.json',
+                    ],
+                ],
+            ],
         ]);
     }
 }

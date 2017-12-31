@@ -7,14 +7,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\Bundle\DataSanitizeBundle\Entity;
+namespace Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="data_sanitize_example_user")
+ * @ORM\Table(name="data_sanitize_demo_user")
  */
 class User
 {
@@ -31,13 +31,13 @@ class User
     protected $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Project", mappedBy="users", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Project", mappedBy="users", cascade={"persist"})
      * @ORM\JoinColumn(name="data_sanitize_example_user_project")
      */
     protected $projects;
 
     /**
-     * @ORM\OneToMany(targetEntity="Endroid\Bundle\DataSanitizeBundle\Entity\Task", mappedBy="user", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Endroid\DataSanitize\Bundle\DataSanitizeDemoBundle\Entity\Task", mappedBy="user", cascade={"persist"})
      */
     protected $tasks;
 
@@ -100,6 +100,7 @@ class User
 
     /**
      * @param Project $project
+     *
      * @return bool
      */
     public function hasProject(Project $project)
@@ -159,6 +160,7 @@ class User
 
     /**
      * @param Task $task
+     *
      * @return bool
      */
     public function hasTask(Task $task)
@@ -192,9 +194,6 @@ class User
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->name;
