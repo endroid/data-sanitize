@@ -1,4 +1,0 @@
-services:
-    endroid_data_sanitize.sanitizer:
-        class: Endroid\DataSanitize\Sanitizer\Sanitizer
-        arguments: [ null, '@doctrine.orm.entity_manager' ]
