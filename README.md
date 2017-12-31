@@ -1,5 +1,4 @@
-Data Sanitize
-=============
+# Data Sanitize
 
 *By [endroid](https://endroid.nl/)*
 
