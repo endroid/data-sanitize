@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 class SanitizerTest extends TestCase
 {
-    public function testNoTestsYet()
+    public function testNoTestsYet(): void
     {
         $this->assertTrue(true);
     }
