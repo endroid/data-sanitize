@@ -7,7 +7,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\DataSanitize\Sanitizer;
+namespace Endroid\DataSanitize;
 
 use Doctrine\DBAL\Platforms\MySqlPlatform;
 use Doctrine\ORM\EntityManagerInterface;
