@@ -10,45 +10,27 @@
 namespace Endroid\DataSanitize\Sanitizer;
 
 use Doctrine\DBAL\Platforms\MySqlPlatform;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionClass;
 
-class Sanitizer
+final class Sanitizer
 {
     const JOIN_TYPE_TABLE = 'table';
     const JOIN_TYPE_COLUMN = 'column';
 
-    /**
-     * @var array
-     */
-    protected $config;
+    private $configuration;
+    private $entityManager;
 
-    /**
-     * @var EntityManager
-     */
-    protected $manager;
-
-    /**
-     * Creates a new instance.
-     *
-     * @param array         $config
-     * @param EntityManager $manager
-     */
-    public function __construct(array $config, EntityManager $manager)
+    public function __construct(array $configuration, EntityManagerInterface $entityManager)
     {
-        $this->config = $config;
-        $this->manager = $manager;
+        $this->configuration = $configuration;
+        $this->entityManager = $entityManager;
     }
 
-    /**
-     * @param string $name
-     * @param array  $sources
-     * @param int    $target
-     */
-    public function sanitize($name, array $sources, $target)
+    public function sanitize(string $entityName, array $sources, object $target): void
     {
-        $relations = $this->getRelations($name);
+        $relations = $this->getRelations($entityName);
 
         foreach ($sources as $source) {
             if ($target !== $source) {
@@ -61,29 +43,29 @@ class Sanitizer
 
                             // 1. Avoid creating duplicates by first removing rows for entries that have both relations
                             $query = 'SELECT `'.$relation['relation_column'].'` FROM `'.$relation['table'].'` WHERE `'.$relation['subject_column']."` IN ('".$source."','".$target."') GROUP BY `".$relation['relation_column'].'` HAVING COUNT(`'.$relation['relation_column'].'`) = 2;';
-                            $doubles = $this->manager->getConnection()->executeQuery($query)->fetchAll();
+                            $doubles = $this->entityManager->getConnection()->executeQuery($query)->fetchAll();
                             foreach ($doubles as &$double) {
                                 $double = $double[$relation['relation_column']];
                             }
                             if (count($doubles) > 0) {
                                 $query = 'DELETE FROM `'.$relation['table'].'` WHERE `'.$relation['subject_column']."` = '".$target."' AND `".$relation['relation_column']."` IN ('".implode("','", $doubles)."');";
-                                $this->manager->getConnection()->executeUpdate($query);
+                                $this->entityManager->getConnection()->executeUpdate($query);
                             }
 
                             // 2. Update relations
                             $query = 'UPDATE `'.$relation['table'].'` SET `'.$relation['subject_column']."` = '".$target."' WHERE `".$relation['subject_column']."` = '".$source."';";
-                            $this->manager->getConnection()->executeUpdate($query);
+                            $this->entityManager->getConnection()->executeUpdate($query);
                             break;
                         case self::JOIN_TYPE_COLUMN:
                             $query = 'UPDATE `'.$relation['table'].'` SET `'.$relation['column']."` = '".$target."' WHERE `".$relation['column']."` = '".$source."';";
-                            $this->manager->getConnection()->executeUpdate($query);
+                            $this->entityManager->getConnection()->executeUpdate($query);
                             break;
                     }
                 }
 
-                $queryBuilder = $this->manager->createQueryBuilder();
+                $queryBuilder = $this->entityManager->createQueryBuilder();
                 $queryBuilder
-                    ->delete($this->getClass($name), 'source')
+                    ->delete($this->getClass($entityName), 'source')
                     ->where('source.id = :source')
                     ->setParameter('source', $source)
                 ;
@@ -93,17 +75,12 @@ class Sanitizer
         }
     }
 
-    /**
-     * @param string $name
-     *
-     * @return array
-     */
-    public function getRelations($name)
+    public function getRelations(string $entityName): array
     {
-        $class = $this->getClass($name);
+        $class = $this->getClass($entityName);
 
         /** @var ClassMetaData[] $metaData */
-        $metaData = $this->manager->getMetadataFactory()->getAllMetadata();
+        $metaData = $this->entityManager->getMetadataFactory()->getAllMetadata();
 
         $relations = [];
         foreach ($metaData as $meta) {
@@ -146,14 +123,9 @@ class Sanitizer
         return $relations;
     }
 
-    /**
-     * @param array $relation
-     *
-     * @return bool
-     */
-    protected function hasForeignKey(array $relation)
+    private function hasForeignKey(array $relation): bool
     {
-        $platform = $this->manager->getConnection()->getDatabasePlatform();
+        $platform = $this->entityManager->getConnection()->getDatabasePlatform();
 
         if (!$platform instanceof MySqlPlatform) {
             return false;
@@ -177,34 +149,21 @@ class Sanitizer
                     AND
                 kcu.COLUMN_NAME = '".$relation['column']."'";
 
-        return $this->manager->getConnection()->executeQuery($query)->rowCount() > 0;
+        return $this->entityManager->getConnection()->executeQuery($query)->rowCount() > 0;
     }
 
-    /**
-     * @return array
-     */
-    public function getConfig()
+    public function getConfiguration(): array
     {
-        return $this->config;
+        return $this->configuration;
     }
 
-    /**
-     * @param string $name
-     *
-     * @return string
-     */
-    public function getClass($name)
+    public function getClass(string $entityName): string
     {
-        return $this->config[$name]['class'];
+        return $this->configuration[$entityName]['class'];
     }
 
-    /**
-     * @param string $name
-     *
-     * @return array
-     */
-    public function getFields($name)
+    public function getFields(string $name): array
     {
-        return $this->config[$name]['fields'];
+        return $this->configuration[$name]['fields'];
     }
 }

@@ -7,11 +7,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Endroid\DataSanitize\Bundle\DataSanitizeBundle;
+namespace Endroid\DataSanitize\Tests;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class EndroidDataSanitizeBundleTest extends PHPUnit_Framework_TestCase
+class SanitizerTest extends TestCase
 {
     public function testNoTestsYet()
     {
