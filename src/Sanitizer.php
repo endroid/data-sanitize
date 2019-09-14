@@ -11,161 +11,71 @@ declare(strict_types=1);
 
 namespace Endroid\DataSanitize;
 
-use Doctrine\DBAL\Platforms\MySqlPlatform;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use ReflectionClass;
 
 final class Sanitizer
 {
-    const JOIN_TYPE_TABLE = 'table';
-    const JOIN_TYPE_COLUMN = 'column';
-
-    private $configuration;
+    /** @var EntityManagerInterface */
     private $entityManager;
 
-    public function __construct(array $configuration, EntityManagerInterface $entityManager)
+    /** @var string */
+    private $class;
+
+    /** @var RelationFinder */
+    private $relationFinder;
+
+    public function __construct(string $class, EntityManagerInterface $entityManager, RelationFinder $relationFinder)
     {
-        $this->configuration = $configuration;
+        $this->class = $class;
         $this->entityManager = $entityManager;
+        $this->relationFinder = $relationFinder;
     }
 
-    public function sanitize(string $entityName, array $sources, object $target): void
+    public function getData(array $fields): array
     {
-        $relations = $this->getRelations($entityName);
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $queryBuilder->from($this->class, 'entity');
 
-        foreach ($sources as $source) {
-            if ($target !== $source) {
-                foreach ($relations as $key => $relation) {
-                    switch ($relation['join']) {
-                        case self::JOIN_TYPE_TABLE:
-
-                            // @todo move to Mysql Adapter
-                            // @todo enclose in single transaction allowing rollback
-
-                            // 1. Avoid creating duplicates by first removing rows for entries that have both relations
-                            $query = 'SELECT `'.$relation['relation_column'].'` FROM `'.$relation['table'].'` WHERE `'.$relation['subject_column']."` IN ('".$source."','".$target."') GROUP BY `".$relation['relation_column'].'` HAVING COUNT(`'.$relation['relation_column'].'`) = 2;';
-                            $doubles = $this->entityManager->getConnection()->executeQuery($query)->fetchAll();
-                            foreach ($doubles as &$double) {
-                                $double = $double[$relation['relation_column']];
-                            }
-                            if (count($doubles) > 0) {
-                                $query = 'DELETE FROM `'.$relation['table'].'` WHERE `'.$relation['subject_column']."` = '".$target."' AND `".$relation['relation_column']."` IN ('".implode("','", $doubles)."');";
-                                $this->entityManager->getConnection()->executeUpdate($query);
-                            }
-
-                            // 2. Update relations
-                            $query = 'UPDATE `'.$relation['table'].'` SET `'.$relation['subject_column']."` = '".$target."' WHERE `".$relation['subject_column']."` = '".$source."';";
-                            $this->entityManager->getConnection()->executeUpdate($query);
-                            break;
-                        case self::JOIN_TYPE_COLUMN:
-                            $query = 'UPDATE `'.$relation['table'].'` SET `'.$relation['column']."` = '".$target."' WHERE `".$relation['column']."` = '".$source."';";
-                            $this->entityManager->getConnection()->executeUpdate($query);
-                            break;
-                    }
-                }
-
-                $queryBuilder = $this->entityManager->createQueryBuilder();
-                $queryBuilder
-                    ->delete($this->getClass($entityName), 'source')
-                    ->where('source.id = :source')
-                    ->setParameter('source', $source)
-                ;
-
-                $queryBuilder->getQuery()->execute();
-            }
-        }
-    }
-
-    public function getRelations(string $entityName): array
-    {
-        $class = $this->getClass($entityName);
-
-        /** @var ClassMetaData[] $metaData */
-        $metaData = $this->entityManager->getMetadataFactory()->getAllMetadata();
-
-        $relations = [];
-        foreach ($metaData as $meta) {
-            foreach ($meta->getAssociationMappings() as $mapping) {
-                if ($mapping['targetEntity'] == $class || $mapping['sourceEntity'] == $class) {
-                    if (isset($mapping['joinTable']['name'])) {
-                        $key = $mapping['joinTable']['name'];
-                        $relation = $mapping['sourceEntity'] == $class ? $mapping['targetEntity'] : $mapping['sourceEntity'];
-                        $relationClass = new ReflectionClass($relation);
-                        $relations[$key] = [
-                            'id' => $key,
-                            'join' => self::JOIN_TYPE_TABLE,
-                            'table' => $mapping['joinTable']['name'],
-                            'subject_column' => $mapping['sourceEntity'] == $class ? $mapping['joinTable']['joinColumns'][0]['name'] : $mapping['joinTable']['inverseJoinColumns'][0]['name'],
-                            'relation_column' => $mapping['targetEntity'] == $class ? $mapping['joinTable']['joinColumns'][0]['name'] : $mapping['joinTable']['inverseJoinColumns'][0]['name'],
-                            'required' => false,
-                            'description' => 'Update relations with '.$relationClass->getShortName(),
-                        ];
-                    } elseif (isset($mapping['joinColumns']) && count($mapping['joinColumns']) > 0 && $mapping['targetEntity'] == $class) {
-                        $key = $meta->table['name'].'.'.$mapping['joinColumns'][0]['name'];
-                        $relation = $mapping['sourceEntity'] == $class ? $mapping['targetEntity'] : $mapping['sourceEntity'];
-                        $relationClass = new ReflectionClass($relation);
-                        $relations[$key] = [
-                            'id' => $key,
-                            'join' => self::JOIN_TYPE_COLUMN,
-                            'table' => $meta->table['name'],
-                            'column' => $mapping['joinColumns'][0]['name'],
-                            'required' => false,
-                            'description' => 'Update relations with '.$relationClass->getShortName(),
-                        ];
-
-                        if ($this->hasForeignKey($relations[$key])) {
-                            $relations[$key]['required'] = true;
-                        }
-                    }
-                }
+        foreach ($fields as $field) {
+            $property = explode('.', $field);
+            if (2 == count($property)) {
+                $queryBuilder->leftJoin('entity.'.$property[0], $property[0]);
+                $queryBuilder->addSelect($field.' AS '.$this->getAlias($field));
+            } else {
+                $queryBuilder->addSelect('entity.'.$field);
             }
         }
 
-        return $relations;
+        return $queryBuilder->getQuery()->getArrayResult();
     }
 
-    private function hasForeignKey(array $relation): bool
+    public function getAlias(string $field): string
     {
-        $platform = $this->entityManager->getConnection()->getDatabasePlatform();
+        $parts = explode('.', $field);
+        $alias = $parts[0];
 
-        if (!$platform instanceof MySqlPlatform) {
-            return false;
+        if (2 == count($parts)) {
+            $alias .= ucfirst($parts[1]);
         }
 
-        // Query all foreign keys on table.column
-        $query = "
-            SELECT
-                *
-            FROM
-                information_schema.TABLE_CONSTRAINTS AS tc,
-                information_schema.KEY_COLUMN_USAGE kcu
-            WHERE
-                tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
-                    AND
-                tc.CONSTRAINT_TYPE = 'FOREIGN KEY'
-                    AND
-                tc.TABLE_SCHEMA = DATABASE()
-                    AND
-                tc.TABLE_NAME = '".$relation['table']."'
-                    AND
-                kcu.COLUMN_NAME = '".$relation['column']."'";
-
-        return $this->entityManager->getConnection()->executeQuery($query)->rowCount() > 0;
+        return $alias;
     }
 
-    public function getConfiguration(): array
+    public function merge(array $sources, string $target): void
     {
-        return $this->configuration;
-    }
+        /** @var AbstractRelation $relation */
+        foreach ($this->relationFinder->getIterator($this->class) as $relation) {
+            $relation->merge($sources, $target);
+        }
 
-    public function getClass(string $entityName): string
-    {
-        return $this->configuration[$entityName]['class'];
-    }
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $queryBuilder
+            ->delete($this->class, 'entity')
+            ->where($queryBuilder->expr()->in('entity.id', $sources))
+        ;
 
-    public function getFields(string $name): array
-    {
-        return $this->configuration[$name]['fields'];
+        $queryBuilder->getQuery()->execute();
+
+        return;
     }
 }
