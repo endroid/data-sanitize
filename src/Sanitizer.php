@@ -63,6 +63,12 @@ final class Sanitizer
 
     public function merge(array $sources, string $target): void
     {
+        $targetIndex = array_search($target, $sources);
+
+        if ($targetIndex !== false) {
+            unset($sources[$targetIndex]);
+        }
+
         /** @var AbstractRelation $relation */
         foreach ($this->relationFinder->getIterator($this->class) as $relation) {
             $relation->merge($sources, $target);
