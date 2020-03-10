@@ -61,7 +61,7 @@ final class Sanitizer
         return $alias;
     }
 
-    public function merge(array $sources, string $target): void
+    public function merge(array $sources, string $target, bool $deleteSources = true): void
     {
         $targetIndex = array_search($target, $sources);
 
@@ -74,13 +74,17 @@ final class Sanitizer
             $relation->merge($sources, $target);
         }
 
-        $queryBuilder = $this->entityManager->createQueryBuilder();
-        $queryBuilder
-            ->delete($this->class, 'entity')
-            ->where($queryBuilder->expr()->in('entity.id', $sources))
-        ;
+        if ($deleteSources) {
+            $queryBuilder = $this->entityManager->createQueryBuilder();
+            $queryBuilder
+                ->delete($this->class, 'entity')
+                ->where($queryBuilder->expr()->in('entity.id', $sources))
+                ->andWhere('entity.id != :target')
+                ->setParameter('target', $target)
+            ;
 
-        $queryBuilder->getQuery()->execute();
+            $queryBuilder->getQuery()->execute();
+        }
 
         return;
     }
