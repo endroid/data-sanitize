@@ -32,14 +32,14 @@ final class RelationFinder
         foreach ($classMetaData as $meta) {
             foreach ($meta->getAssociationMappings() as $mapping) {
                 $relation = $this->createRelation($class, $mapping, $meta);
-                if ($relation instanceof AbstractRelation) {
+                if ($relation instanceof RelationInterface) {
                     yield $relation;
                 }
             }
         }
     }
 
-    private function createRelation(string $class, array $mapping, ClassMetadata $classMetadata): ?AbstractRelation
+    private function createRelation(string $class, array $mapping, ClassMetadata $classMetadata): ?RelationInterface
     {
         if ($mapping['targetEntity'] !== $class && $mapping['sourceEntity'] !== $class) {
             return null;

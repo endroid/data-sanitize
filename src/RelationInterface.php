@@ -11,7 +11,8 @@ declare(strict_types=1);
 
 namespace Endroid\DataSanitize;
 
-abstract class AbstractRelation
+interface RelationInterface
 {
-    abstract public function merge(array $sources, string $target): void;
+    public function merge(array $sources, string $target): void;
+    public function delete(array $ids): void;
 }

@@ -13,7 +13,7 @@ namespace Endroid\DataSanitize;
 
 use Doctrine\DBAL\Connection;
 
-final class TableRelation extends AbstractRelation
+final class TableRelation implements RelationInterface
 {
     /** @var Connection */
     private $connection;
@@ -40,10 +40,18 @@ final class TableRelation extends AbstractRelation
         $query = '
             UPDATE IGNORE '.$this->tableName.'
             SET '.$this->columnName.' = "'.$target.'"
-            WHERE '.$this->columnName.' IN ("'.implode('","', $sources).'");
-            
-            DELETE FROM '.$this->tableName.'
             WHERE '.$this->columnName.' IN ("'.implode('","', $sources).'");';
+
+        $this->connection->executeUpdate($query);
+
+        $this->delete($sources);
+    }
+
+    public function delete(array $ids): void
+    {
+        $query = '
+            DELETE FROM '.$this->tableName.'
+            WHERE '.$this->columnName.' IN ("'.implode('","', $ids).'");';
 
         $this->connection->executeUpdate($query);
     }

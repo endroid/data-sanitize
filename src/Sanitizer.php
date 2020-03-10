@@ -69,23 +69,31 @@ final class Sanitizer
             unset($sources[$targetIndex]);
         }
 
-        /** @var AbstractRelation $relation */
+        /** @var RelationInterface $relation */
         foreach ($this->relationFinder->getIterator($this->class) as $relation) {
             $relation->merge($sources, $target);
         }
 
         if ($deleteSources) {
-            $queryBuilder = $this->entityManager->createQueryBuilder();
-            $queryBuilder
-                ->delete($this->class, 'entity')
-                ->where($queryBuilder->expr()->in('entity.id', $sources))
-                ->andWhere('entity.id != :target')
-                ->setParameter('target', $target)
-            ;
-
-            $queryBuilder->getQuery()->execute();
+            $this->delete($sources);
         }
 
         return;
+    }
+
+    public function delete(array $ids): void
+    {
+        /** @var RelationInterface $relation */
+        foreach ($this->relationFinder->getIterator($this->class) as $relation) {
+            $relation->delete($ids);
+        }
+
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $queryBuilder
+            ->delete($this->class, 'entity')
+            ->where($queryBuilder->expr()->in('entity.id', $ids))
+        ;
+
+        $queryBuilder->getQuery()->execute();
     }
 }

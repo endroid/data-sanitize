@@ -13,7 +13,7 @@ namespace Endroid\DataSanitize;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-final class ColumnRelation extends AbstractRelation
+final class ColumnRelation implements RelationInterface
 {
     /** @var EntityManagerInterface */
     private $entityManager;
@@ -38,6 +38,19 @@ final class ColumnRelation extends AbstractRelation
             ->update($this->class, 'relation')
             ->set('relation.'.$this->fieldName, $target)
             ->where($queryBuilder->expr()->in('relation.'.$this->fieldName, $sources))
+        ;
+
+        $queryBuilder->getQuery()->execute();
+    }
+
+    public function delete(array $ids): void
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $queryBuilder
+            ->update($this->class, 'relation')
+            ->set('relation.'.$this->fieldName, ':target')
+            ->where($queryBuilder->expr()->in('relation.'.$this->fieldName, $ids))
+            ->setParameter('target', null)
         ;
 
         $queryBuilder->getQuery()->execute();
