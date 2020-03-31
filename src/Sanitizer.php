@@ -65,7 +65,7 @@ final class Sanitizer
     {
         $targetIndex = array_search($target, $sources);
 
-        if ($targetIndex !== false) {
+        if (false !== $targetIndex) {
             unset($sources[$targetIndex]);
         }
 

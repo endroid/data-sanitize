@@ -14,5 +14,6 @@ namespace Endroid\DataSanitize;
 interface RelationInterface
 {
     public function merge(array $sources, string $target): void;
+
     public function delete(array $ids): void;
 }
