@@ -61,37 +61,23 @@ final class Sanitizer
         return $alias;
     }
 
-    public function merge(array $sources, string $target, bool $deleteSources = true): void
+    public function merge(array $sourceIds, string $targetId): void
     {
-        $targetIndex = array_search($target, $sources);
+        $targetIndex = array_search($targetId, $sourceIds);
 
         if (false !== $targetIndex) {
-            unset($sources[$targetIndex]);
+            unset($sourceIds[$targetIndex]);
         }
 
-        /** @var RelationInterface $relation */
+        /** @var Relation $relation */
         foreach ($this->relationFinder->getIterator($this->class) as $relation) {
-            $relation->merge($sources, $target);
-        }
-
-        if ($deleteSources) {
-            $this->delete($sources);
-        }
-
-        return;
-    }
-
-    public function delete(array $ids): void
-    {
-        /** @var RelationInterface $relation */
-        foreach ($this->relationFinder->getIterator($this->class) as $relation) {
-            $relation->delete($ids);
+            $relation->merge($sourceIds, $targetId);
         }
 
         $queryBuilder = $this->entityManager->createQueryBuilder();
         $queryBuilder
             ->delete($this->class, 'entity')
-            ->where($queryBuilder->expr()->in('entity.id', $ids))
+            ->where($queryBuilder->expr()->in('entity.id', $sourceIds))
         ;
 
         $queryBuilder->getQuery()->execute();

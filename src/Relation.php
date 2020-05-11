@@ -13,7 +13,7 @@ namespace Endroid\DataSanitize;
 
 use Doctrine\DBAL\Connection;
 
-final class TableRelation implements RelationInterface
+final class Relation
 {
     /** @var Connection */
     private $connection;
@@ -24,34 +24,25 @@ final class TableRelation implements RelationInterface
     /** @var string */
     private $columnName;
 
-    /** @var string */
-    private $inverseColumnName;
-
-    public function __construct(Connection $connection, string $tableName, string $columnName, string $inverseColumnName)
+    public function __construct(Connection $connection, string $tableName, string $columnName)
     {
         $this->connection = $connection;
         $this->tableName = $tableName;
         $this->columnName = $columnName;
-        $this->inverseColumnName = $inverseColumnName;
     }
 
-    public function merge(array $sources, string $target): void
+    public function merge(array $sourceIds, string $targetId): void
     {
         $query = '
             UPDATE IGNORE '.$this->tableName.'
-            SET '.$this->columnName.' = "'.$target.'"
-            WHERE '.$this->columnName.' IN ("'.implode('","', $sources).'");';
+            SET '.$this->columnName.' = "'.$targetId.'"
+            WHERE '.$this->columnName.' IN ("'.implode('","', $sourceIds).'");';
 
         $this->connection->executeUpdate($query);
 
-        $this->delete($sources);
-    }
-
-    public function delete(array $ids): void
-    {
         $query = '
             DELETE FROM '.$this->tableName.'
-            WHERE '.$this->columnName.' IN ("'.implode('","', $ids).'");';
+            WHERE '.$this->columnName.' IN ("'.implode('","', $sourceIds).'");';
 
         $this->connection->executeUpdate($query);
     }
