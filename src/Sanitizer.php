@@ -31,6 +31,11 @@ final class Sanitizer
         $this->relationFinder = $relationFinder;
     }
 
+    /**
+     * @param array<string> $fields
+     *
+     * @return array<mixed>
+     */
     public function getData(array $fields): array
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
@@ -61,6 +66,7 @@ final class Sanitizer
         return $alias;
     }
 
+    /** @param array<string> $sourceIds */
     public function merge(array $sourceIds, string $targetId): void
     {
         $targetIndex = array_search($targetId, $sourceIds);

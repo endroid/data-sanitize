@@ -24,9 +24,10 @@ final class RelationFinder
         $this->entityManager = $entityManager;
     }
 
+    /** @return \Generator<Relation> */
     public function getIterator(string $class): \Generator
     {
-        /** @var ClassMetadata[] $classMetaData */
+        /** @var array<ClassMetadata> $classMetaData */
         $classMetaData = $this->entityManager->getMetadataFactory()->getAllMetadata();
 
         foreach ($classMetaData as $meta) {
@@ -39,6 +40,7 @@ final class RelationFinder
         }
     }
 
+    /** @param array<mixed> $mapping */
     private function createRelation(string $class, array $mapping, ClassMetadata $classMetadata): ?Relation
     {
         if ($mapping['targetEntity'] !== $class && $mapping['sourceEntity'] !== $class) {

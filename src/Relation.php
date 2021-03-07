@@ -31,6 +31,7 @@ final class Relation
         $this->columnName = $columnName;
     }
 
+    /** @param array<string> $sourceIds */
     public function merge(array $sourceIds, string $targetId): void
     {
         $targetIdValue = '' === $targetId ? 'NULL' : $targetId;
