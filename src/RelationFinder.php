@@ -2,13 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * (c) Jeroen van den Enden <info@endroid.nl>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Endroid\DataSanitize;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,18 +9,13 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 
 final class RelationFinder
 {
-    /** @var EntityManagerInterface */
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
+    public function __construct(
+        private EntityManagerInterface $entityManager
+    ) {
     }
 
-    /** @return \Generator<Relation> */
     public function getIterator(string $class): \Generator
     {
-        /** @var array<ClassMetadata> $classMetaData */
         $classMetaData = $this->entityManager->getMetadataFactory()->getAllMetadata();
 
         foreach ($classMetaData as $meta) {
@@ -40,7 +28,10 @@ final class RelationFinder
         }
     }
 
-    /** @param array<mixed> $mapping */
+    /**
+     * @param array<mixed>          $mapping
+     * @param ClassMetadata<object> $classMetadata
+     */
     private function createRelation(string $class, array $mapping, ClassMetadata $classMetadata): ?Relation
     {
         if ($mapping['targetEntity'] !== $class && $mapping['sourceEntity'] !== $class) {

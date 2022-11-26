@@ -2,33 +2,17 @@
 
 declare(strict_types=1);
 
-/*
- * (c) Jeroen van den Enden <info@endroid.nl>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Endroid\DataSanitize;
 
 use Doctrine\ORM\EntityManagerInterface;
 
 final class Sanitizer
 {
-    /** @var EntityManagerInterface */
-    private $entityManager;
-
-    /** @var string */
-    private $class;
-
-    /** @var RelationFinder */
-    private $relationFinder;
-
-    public function __construct(string $class, EntityManagerInterface $entityManager, RelationFinder $relationFinder)
-    {
-        $this->class = $class;
-        $this->entityManager = $entityManager;
-        $this->relationFinder = $relationFinder;
+    public function __construct(
+        private string $class,
+        private EntityManagerInterface $entityManager,
+        private RelationFinder $relationFinder
+    ) {
     }
 
     /**
