@@ -10,6 +10,20 @@ final class SanitizerTest extends TestCase
 {
     public function testNoTestsYet(): void
     {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(__DIR__.'/../src'),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        $files = [];
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                continue;
+            }
+
+            include_once $file->getPathname();
+        }
+
         $this->assertTrue(true);
     }
 }
