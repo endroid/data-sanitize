@@ -7,22 +7,23 @@ namespace Endroid\DataSanitize;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-final class RelationFinder
+final readonly class RelationFinder
 {
     public function __construct(
         private EntityManagerInterface $entityManager
     ) {
     }
 
+    /** @return \Generator<Relation> */
     public function getIterator(string $class): \Generator
     {
         $classMetaData = $this->entityManager->getMetadataFactory()->getAllMetadata();
 
         foreach ($classMetaData as $meta) {
             foreach ($meta->getAssociationMappings() as $mapping) {
-                $relation = $this->createRelation($class, $mapping, $meta);
-                if ($relation instanceof Relation) {
-                    yield $relation;
+                try {
+                    yield $this->createRelation($class, $mapping, $meta);
+                } catch (\Throwable) {
                 }
             }
         }
@@ -32,10 +33,10 @@ final class RelationFinder
      * @param array<mixed>          $mapping
      * @param ClassMetadata<object> $classMetadata
      */
-    private function createRelation(string $class, array $mapping, ClassMetadata $classMetadata): ?Relation
+    private function createRelation(string $class, array $mapping, ClassMetadata $classMetadata): Relation
     {
         if ($mapping['targetEntity'] !== $class && $mapping['sourceEntity'] !== $class) {
-            return null;
+            throw new \Exception('Could not create relation');
         }
 
         if (isset($mapping['joinTable']['name'])) {
@@ -54,7 +55,6 @@ final class RelationFinder
                 $mapping['joinColumns'][0]['name']
             );
         }
-
-        return null;
+        throw new \Exception('Could not create relation');
     }
 }

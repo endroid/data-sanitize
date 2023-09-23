@@ -6,7 +6,7 @@ namespace Endroid\DataSanitize;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-final class SanitizerFactory
+final readonly class SanitizerFactory
 {
     public function __construct(
         private EntityManagerInterface $entityManager,

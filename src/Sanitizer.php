@@ -6,7 +6,7 @@ namespace Endroid\DataSanitize;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-final class Sanitizer
+final readonly class Sanitizer
 {
     public function __construct(
         private string $class,
@@ -59,7 +59,6 @@ final class Sanitizer
             unset($sourceIds[$targetIndex]);
         }
 
-        /** @var Relation $relation */
         foreach ($this->relationFinder->getIterator($this->class) as $relation) {
             $relation->merge($sourceIds, $targetId);
         }
