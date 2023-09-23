@@ -6,11 +6,11 @@ namespace Endroid\DataSanitize;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class SanitizerFactory
+final class SanitizerFactory
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private RelationFinder $relationFinder
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RelationFinder $relationFinder
     ) {
     }
 

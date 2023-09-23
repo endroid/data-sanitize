@@ -7,10 +7,10 @@ namespace Endroid\DataSanitize;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-final readonly class RelationFinder
+final class RelationFinder
 {
     public function __construct(
-        private EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager
     ) {
     }
 
