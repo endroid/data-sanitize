@@ -20,21 +20,21 @@ final class Relation
     {
         $targetIdValue = '' === $targetId ? 'NULL' : $targetId;
 
-        // Update existing values with target value
-        // In case of duplicate or invalid NULL ignore
-        $query = '
-            UPDATE IGNORE '.$this->tableName.'
-            SET '.$this->columnName.' = '.$targetIdValue.'
-            WHERE '.$this->columnName.' IN ("'.implode('","', $sourceIds).'");';
+        foreach ($sourceIds as $sourceId) {
+            // Update existing values with target value
+            // In case of duplicate or invalid NULL ignore
+            $this->connection->executeStatement('
+                UPDATE '.$this->tableName.'
+                SET '.$this->columnName.' = '.$targetIdValue.'
+                WHERE '.$this->columnName.' = :sourceId
+            ', ['sourceId' => $sourceId]);
 
-        $this->connection->executeStatement($query);
-
-        // Make sure failed updates because of duplicate or invalid NULL are deleted
-        // This is the only way to ensure that the source entities can be removed
-        $query = '
-            DELETE FROM '.$this->tableName.'
-            WHERE '.$this->columnName.' IN ("'.implode('","', $sourceIds).'");';
-
-        $this->connection->executeStatement($query);
+            // Make sure failed updates because of duplicate or invalid NULL are deleted
+            // This is the only way to ensure that the source entities can be removed
+            $this->connection->executeStatement('
+                DELETE FROM '.$this->tableName.'
+                WHERE '.$this->columnName.' = :sourceId
+            ', ['sourceId' => $sourceId]);
+        }
     }
 }
