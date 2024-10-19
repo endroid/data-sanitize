@@ -14,6 +14,7 @@ final readonly class SanitizerFactory
     ) {
     }
 
+    /** @param class-string $class */
     public function create(string $class): Sanitizer
     {
         return new Sanitizer($class, $this->entityManager, $this->relationFinder);
