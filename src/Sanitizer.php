@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 final readonly class Sanitizer
 {
     public function __construct(
+        /** @var class-string */
         private string $class,
         private EntityManagerInterface $entityManager,
         private RelationFinder $relationFinder,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Endroid\DataSanitize;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\AssociationMapping;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 final readonly class RelationFinder
@@ -30,10 +31,9 @@ final readonly class RelationFinder
     }
 
     /**
-     * @param array<mixed>          $mapping
      * @param ClassMetadata<object> $classMetadata
      */
-    private function createRelation(string $class, array $mapping, ClassMetadata $classMetadata): Relation
+    private function createRelation(string $class, AssociationMapping $mapping, ClassMetadata $classMetadata): Relation
     {
         if ($mapping['targetEntity'] !== $class && $mapping['sourceEntity'] !== $class) {
             throw new \Exception('Could not create relation');
