@@ -6,12 +6,12 @@ namespace Endroid\DataSanitize;
 
 use Doctrine\DBAL\Connection;
 
-final class Relation
+final readonly class Relation
 {
     public function __construct(
-        private readonly Connection $connection,
-        private readonly string $tableName,
-        private readonly string $columnName
+        private Connection $connection,
+        private string $tableName,
+        private string $columnName,
     ) {
     }
 
