@@ -11,8 +11,7 @@ final readonly class SanitizerFactory
     public function __construct(
         private EntityManagerInterface $entityManager,
         private RelationFinder $relationFinder,
-    ) {
-    }
+    ) {}
 
     /** @param class-string $class */
     public function create(string $class): Sanitizer
