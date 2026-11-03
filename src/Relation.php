@@ -12,8 +12,7 @@ final readonly class Relation
         private Connection $connection,
         private string $tableName,
         private string $columnName,
-    ) {
-    }
+    ) {}
 
     /** @param array<string> $sourceIds */
     public function merge(array $sourceIds, string $targetId): void
@@ -23,18 +22,36 @@ final readonly class Relation
         foreach ($sourceIds as $sourceId) {
             // Update existing values with target value
             // In case of duplicate or invalid NULL ignore
-            $this->connection->executeStatement('
-                UPDATE '.$this->tableName.'
-                SET '.$this->columnName.' = '.$targetIdValue.'
-                WHERE '.$this->columnName.' = :sourceId
-            ', ['sourceId' => $sourceId]);
+            $this->connection->executeStatement(
+                '
+                UPDATE '
+                . $this->tableName
+                . '
+                SET '
+                . $this->columnName
+                . ' = '
+                . $targetIdValue
+                . '
+                WHERE '
+                . $this->columnName
+                . ' = :sourceId
+            ',
+                ['sourceId' => $sourceId],
+            );
 
             // Make sure failed updates because of duplicate or invalid NULL are deleted
             // This is the only way to ensure that the source entities can be removed
-            $this->connection->executeStatement('
-                DELETE FROM '.$this->tableName.'
-                WHERE '.$this->columnName.' = :sourceId
-            ', ['sourceId' => $sourceId]);
+            $this->connection->executeStatement(
+                '
+                DELETE FROM '
+                . $this->tableName
+                . '
+                WHERE '
+                . $this->columnName
+                . ' = :sourceId
+            ',
+                ['sourceId' => $sourceId],
+            );
         }
     }
 }

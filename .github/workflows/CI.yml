@@ -7,14 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['8.4', '8.5']
+        php-versions: ['8.5', '8.6']
       fail-fast: false
     steps:
       - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: gd, mbstring, zip
+          extensions: gd, mbstring, pdo_sqlite, zip
           ini-values: max_execution_time=600, memory_limit=-1
           tools: composer:v2
           coverage: xdebug

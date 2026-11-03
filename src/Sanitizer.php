@@ -13,8 +13,7 @@ final readonly class Sanitizer
         private string $class,
         private EntityManagerInterface $entityManager,
         private RelationFinder $relationFinder,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array<string> $fields
@@ -28,12 +27,13 @@ final readonly class Sanitizer
 
         foreach ($fields as $field) {
             $property = explode('.', $field);
-            if (2 == count($property)) {
-                $queryBuilder->leftJoin('entity.'.$property[0], $property[0]);
-                $queryBuilder->addSelect($field.' AS '.$this->getAlias($field));
-            } else {
-                $queryBuilder->addSelect('entity.'.$field);
+            if (2 === count($property)) {
+                $queryBuilder->leftJoin('entity.' . $property[0], $property[0]);
+                $queryBuilder->addSelect($field . ' AS ' . $this->getAlias($field));
+                continue;
             }
+
+            $queryBuilder->addSelect('entity.' . $field);
         }
 
         return $queryBuilder->getQuery()->getArrayResult();
@@ -44,8 +44,8 @@ final readonly class Sanitizer
         $parts = explode('.', $field);
         $alias = $parts[0];
 
-        if (2 == count($parts)) {
-            $alias .= ucfirst($parts[1]);
+        if (2 === count($parts)) {
+            $alias .= ucfirst($parts[1] ?? '');
         }
 
         return $alias;
@@ -54,7 +54,7 @@ final readonly class Sanitizer
     /** @param array<string> $sourceIds */
     public function merge(array $sourceIds, string $targetId): void
     {
-        $targetIndex = array_search($targetId, $sourceIds);
+        $targetIndex = array_search($targetId, $sourceIds, strict: true);
 
         if (false !== $targetIndex) {
             unset($sourceIds[$targetIndex]);
@@ -65,10 +65,7 @@ final readonly class Sanitizer
         }
 
         $queryBuilder = $this->entityManager->createQueryBuilder();
-        $queryBuilder
-            ->delete($this->class, 'entity')
-            ->where($queryBuilder->expr()->in('entity.id', $sourceIds))
-        ;
+        $queryBuilder->delete($this->class, 'entity')->where($queryBuilder->expr()->in('entity.id', $sourceIds));
 
         $queryBuilder->getQuery()->execute();
     }

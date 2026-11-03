@@ -7,13 +7,14 @@ namespace Endroid\DataSanitize;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\AssociationMapping;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ManyToManyOwningSideMapping;
+use Doctrine\ORM\Mapping\ToOneOwningSideMapping;
 
 final readonly class RelationFinder
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-    ) {
-    }
+    ) {}
 
     /** @return \Generator<Relation> */
     public function getIterator(string $class): \Generator
@@ -25,6 +26,8 @@ final readonly class RelationFinder
                 try {
                     yield $this->createRelation($class, $mapping, $meta);
                 } catch (\Throwable) {
+                    // Ignore associations that cannot be represented as a relation.
+                    continue;
                 }
             }
         }
@@ -35,25 +38,33 @@ final readonly class RelationFinder
      */
     private function createRelation(string $class, AssociationMapping $mapping, ClassMetadata $classMetadata): Relation
     {
-        if ($mapping['targetEntity'] !== $class && $mapping['sourceEntity'] !== $class) {
+        if ($mapping->targetEntity !== $class && $mapping->sourceEntity !== $class) {
             throw new \Exception('Could not create relation');
         }
 
-        if (isset($mapping['joinTable']['name'])) {
-            $joinColumn = $mapping['joinTable']['joinColumns'][0]['name'];
-            $inverseJoinColumn = $mapping['joinTable']['inverseJoinColumns'][0]['name'];
+        if ($mapping instanceof ManyToManyOwningSideMapping) {
+            $joinColumn = $mapping->joinTable->joinColumns[0] ?? null;
+            $inverseJoinColumn = $mapping->joinTable->inverseJoinColumns[0] ?? null;
+            if (null === $joinColumn || null === $inverseJoinColumn) {
+                throw new \Exception('Could not create relation');
+            }
 
             return new Relation(
                 $this->entityManager->getConnection(),
-                $mapping['joinTable']['name'],
-                $mapping['sourceEntity'] == $class ? $joinColumn : $inverseJoinColumn
+                $mapping->joinTable->name,
+                $mapping->sourceEntity === $class ? $joinColumn->name : $inverseJoinColumn->name,
             );
-        } elseif (isset($mapping['joinColumns']) && count($mapping['joinColumns']) > 0 && $mapping['targetEntity'] === $class) {
-            return new Relation(
-                $this->entityManager->getConnection(),
-                $classMetadata->getTableName(),
-                $mapping['joinColumns'][0]['name']
-            );
+        }
+
+        if ($mapping instanceof ToOneOwningSideMapping && $mapping->targetEntity === $class) {
+            $joinColumn = $mapping->joinColumns[0] ?? null;
+            if (null !== $joinColumn) {
+                return new Relation(
+                    $this->entityManager->getConnection(),
+                    $classMetadata->getTableName(),
+                    $joinColumn->name,
+                );
+            }
         }
         throw new \Exception('Could not create relation');
     }
